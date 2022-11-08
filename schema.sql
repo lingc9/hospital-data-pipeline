@@ -34,7 +34,7 @@
 CREATE TABLE hospital (
 	id SERIAL PRIMARY KEY,
 	hospital_id TEXT NOT NULL,
-	collection_date DATE CHECK(date <= CURRENT_DATE) NOT NULL,
+	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
 	week INT CHECK(week > 0) NOT NULL,
 	name TEXT NOT NULL,
 	state CHAR(2),
