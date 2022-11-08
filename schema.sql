@@ -1,4 +1,5 @@
--- Basic Entity: a deserialized entry recording the state of one particular hospital at a particular point in time. Weekly update is inserted to this same entity. 
+-- Basic Entity: hospital_data stores all the weekly updated information from the HHS and CMS data, like hospital beds count. 
+-- hospital_info stores the more permanent data, like hospital name and address.
 
 -- from HHS data
 -- id: a unique identifier for combination of hospital + date
@@ -44,18 +45,20 @@ CREATE TABLE hospital_data (
 	occupied_ICU_beds INT CHECK(occupied_ICU_beds >= 0),
 	COVID_beds_use INT CHECK(COVID_beds_use >= 0),
 	COVID_ICU_use INT CHECK(COVID_ICU_use >= 0), 
-	ownership TEXT NOT NULL, 
-	quality_rating INT,
+	quality_rating INT CHECK(quality_rating <= 5 AND quality_rating > 0),
 	CHECK(avalible_adult_beds >= occupied_adult_beds), 
 	CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
 	CHECK(available_ICU_beds >= occupied_ICU_beds), 
-	CHECK(available_ICU_beds >= COVID_ICU_use)
+	CHECK(available_ICU_beds >= COVID_ICU_use),
+	CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
 );
 
 CREATE TABLE hospital_info (
 	id SERIAL PRIMARY KEY,
-	hospital_type TEXT NOT NULL,
 	name TEXT NOT NULL,
+	hospital_id TEXT NOT NULL,
+	hospital_type TEXT NOT NULL,
+	ownership TEXT NOT NULL, 
 	state CHAR(2),
 	address TEXT,
 	city TEXT,
@@ -65,3 +68,4 @@ CREATE TABLE hospital_info (
 	longitude DECIMAL,
 	emergency_service BOOLEAN
 );
+
