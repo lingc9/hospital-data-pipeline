@@ -31,11 +31,30 @@
 -- week: the number of week since the database starts tracking (1,2,3..)
 
 
-CREATE TABLE hospital (
+CREATE TABLE hospital_data (
 	id SERIAL PRIMARY KEY,
 	hospital_id TEXT NOT NULL,
 	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
 	week INT CHECK(week > 0) NOT NULL,
+	avalible_adult_beds INT CHECK(avalible_adult_beds >= 0),
+	avalible_pediatric_beds INT CHECK(avalible_pediatric_beds >= 0), 
+	occupied_adult_beds INT CHECK(occupied_adult_beds >= 0),
+	occupied_pediatric_beds INT CHECK(occupied_pediatric_beds >= 0),
+	available_ICU_beds INT CHECK(available_ICU_beds >= 0),
+	occupied_ICU_beds INT CHECK(occupied_ICU_beds >= 0),
+	COVID_beds_use INT CHECK(COVID_beds_use >= 0),
+	COVID_ICU_use INT CHECK(COVID_ICU_use >= 0), 
+	ownership TEXT NOT NULL, 
+	quality_rating INT,
+	CHECK(avalible_adult_beds >= occupied_adult_beds), 
+	CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
+	CHECK(available_ICU_beds >= occupied_ICU_beds), 
+	CHECK(available_ICU_beds >= COVID_ICU_use)
+);
+
+CREATE TABLE hospital_info (
+	id SERIAL PRIMARY KEY,
+	hospital_type TEXT NOT NULL,
 	name TEXT NOT NULL,
 	state CHAR(2),
 	address TEXT,
@@ -44,20 +63,5 @@ CREATE TABLE hospital (
 	fips CHAR(5),
 	latitude DECIMAL, 
 	longitude DECIMAL,
-	avalible_adult_beds INT CHECK(avalible_adult_beds >= 0),
-	avalible_pediatric_beds INT CHECK(avalible_pediatric_beds >= 0), 
-	occupied_adult_beds INT CHECK(occupied_adult_beds >= 0),
-	occupied_pediatric_beds INT CHECK(occupied_pediatric_beds >= 0),
-	available_ICU_beds INT CHECK(available_ICU_beds >= 0),
-	occupied_ICU_beds INT CHECK(occupied_ICU_beds >= 0),
-	COVID_beds_use INT CHECK(COVID_beds_use >= 0),
-	COVID_ICU_use INT CHECK(COVID_ICU_use >= 0),
-	hospital_type TEXT NOT NULL, 
-	ownership TEXT NOT NULL,
-	emergency_service BOOLEAN, 
-	quality_rating INT,
-	CHECK(avalible_adult_beds >= occupied_adult_beds), 
-	CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
-	CHECK(available_ICU_beds >= occupied_ICU_beds), 
-	CHECK(available_ICU_beds >= COVID_ICU_use)
-);
+	emergency_service BOOLEAN
+)
