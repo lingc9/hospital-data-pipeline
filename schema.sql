@@ -64,4 +64,4 @@ CREATE TABLE hospital_info (
 	latitude DECIMAL, 
 	longitude DECIMAL,
 	emergency_service BOOLEAN
-)
+);
