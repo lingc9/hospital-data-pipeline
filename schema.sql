@@ -2,7 +2,7 @@
 
 -- from HHS data
 -- id: a unique identifier for combination of hospital + date
--- hospital_id: a unique ID for each hospital
+-- hospital_id: a unique ID for each hospital, corresponds to hospital_pk
 -- name: the name of the hospital facility
 -- state: two letter state id 
 -- address: street address of the hospital
@@ -27,14 +27,14 @@
 -- quality_rating: The hospital’s overall quality rating, updates multiple times a year
 
 -- Misc
--- date: the date when the data is updated
+-- collection_date: the date when the data is collected
 -- week: the number of week since the database starts tracking (1,2,3..)
 
 
 CREATE TABLE hospital (
 	id SERIAL PRIMARY KEY,
-	hospital_pk TEXT NOT NULL,
-	date DATE CHECK(date <= CURRENT_DATE) NOT NULL,
+	hospital_id TEXT NOT NULL,
+	collection_date DATE CHECK(date <= CURRENT_DATE) NOT NULL,
 	week INT CHECK(week > 0) NOT NULL,
 	name TEXT NOT NULL,
 	state CHAR(2),
