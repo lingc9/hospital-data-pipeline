@@ -54,7 +54,7 @@ CREATE TABLE hospital_data (
 );
 
 CREATE TABLE hospital_info (
-	hospital_id TEXT PRIMARY KEY NOT NULL REFERENCES hospital_data,
+	hospital_id TEXT PRIMARY KEY NOT NULL,
 	name TEXT NOT NULL,
 	hospital_type TEXT NOT NULL,
 	ownership TEXT NOT NULL, 
