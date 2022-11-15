@@ -58,6 +58,7 @@ CREATE TABLE hospital_info (
 	name TEXT NOT NULL,
 	hospital_type TEXT NOT NULL,
 	ownership TEXT NOT NULL, 
+	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
 	state CHAR(2),
 	address TEXT,
 	city TEXT,
