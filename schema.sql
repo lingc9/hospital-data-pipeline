@@ -29,14 +29,12 @@
 
 -- Misc
 -- collection_date: the date when the data is collected
--- week: the number of week since the database starts tracking (1,2,3..)
 
 
 CREATE TABLE hospital_data (
 	id SERIAL PRIMARY KEY,
 	hospital_id TEXT NOT NULL,
 	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
-	week INT CHECK(week > 0) NOT NULL,
 	avalible_adult_beds INT CHECK(avalible_adult_beds >= 0),
 	avalible_pediatric_beds INT CHECK(avalible_pediatric_beds >= 0), 
 	occupied_adult_beds INT CHECK(occupied_adult_beds >= 0),
@@ -45,12 +43,18 @@ CREATE TABLE hospital_data (
 	occupied_ICU_beds INT CHECK(occupied_ICU_beds >= 0),
 	COVID_beds_use INT CHECK(COVID_beds_use >= 0),
 	COVID_ICU_use INT CHECK(COVID_ICU_use >= 0), 
-	quality_rating INT CHECK(quality_rating <= 5 AND quality_rating > 0),
 	CHECK(avalible_adult_beds >= occupied_adult_beds), 
 	CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
 	CHECK(available_ICU_beds >= occupied_ICU_beds), 
 	CHECK(available_ICU_beds >= COVID_ICU_use),
 	CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
+);
+
+CREATE TABLE hospital_location (
+	hospital_id TEXT PRIMARY KEY NOT NULL REFERENCE hospital_info(hospital_id),
+	fips CHAR(5),
+	latitude DECIMAL, 
+	longitude DECIMAL
 );
 
 CREATE TABLE hospital_info (
@@ -66,6 +70,6 @@ CREATE TABLE hospital_info (
 	fips CHAR(5),
 	latitude DECIMAL, 
 	longitude DECIMAL,
-	emergency_service BOOLEAN
+	emergency_service BOOLEAN,
+	quality_rating INT CHECK(quality_rating <= 5 AND quality_rating > 0)
 );
-
