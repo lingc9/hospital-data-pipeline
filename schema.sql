@@ -1,5 +1,6 @@
 -- Basic Entity: hospital_data stores all the weekly updated information from the HHS and CMS data, like hospital beds count. 
--- hospital_info stores the more permanent data, like hospital name and address.
+-- hospital_info stores the more permanent data, like hospital name, address, and rating.
+-- hospital_location stores the more permanent data, including fips, latitude and longtitude
 
 -- from HHS data
 -- id: a unique identifier for combination of hospital + date
@@ -50,13 +51,6 @@ CREATE TABLE hospital_data (
 	CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
 );
 
-CREATE TABLE hospital_location (
-	hospital_id TEXT PRIMARY KEY NOT NULL REFERENCE hospital_info(hospital_id),
-	fips CHAR(5),
-	latitude DECIMAL, 
-	longitude DECIMAL
-);
-
 CREATE TABLE hospital_info (
 	hospital_id TEXT PRIMARY KEY NOT NULL,
 	name TEXT NOT NULL,
@@ -67,9 +61,14 @@ CREATE TABLE hospital_info (
 	address TEXT,
 	city TEXT,
 	zip CHAR(5),
-	fips CHAR(5),
-	latitude DECIMAL, 
-	longitude DECIMAL,
 	emergency_service BOOLEAN,
 	quality_rating INT CHECK(quality_rating <= 5 AND quality_rating > 0)
+);
+
+CREATE TABLE hospital_location (
+	hospital_id TEXT PRIMARY KEY NOT NULL REFERENCES hospital_info(hospital_id),
+	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
+	fips CHAR(5),
+	latitude DECIMAL, 
+	longitude DECIMAL
 );
