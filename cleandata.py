@@ -23,11 +23,11 @@ file_path - directory to where the csv file is stored, in string
 import pandas as pd
 
 
-def format_geocode(code):
-    # Turn 'POINT (-91.145057 30.655648)'
-    # Into longitude = -91.145057
-    #      latitude = 30.655648
-    pass
+def format_geocode(file_path):
+    df = pd.read_csv(file_path)
+    long = df.geocoded_hospital_address.apply(lambda x : x[7:16])
+    lat = df.geocoded_hospital_address.apply(lambda y : y[-10:-2])
+    return long, lat
 
 
 def clean_quality_data(file_path):
@@ -53,10 +53,34 @@ def clean_quality_data(file_path):
 
 def clean_hhs_data(file_path):
     df = pd.read_csv(file_path)
-    clean_df = pd.DataFrame()
+    clean_df = pd.DataFrame(file_path)
+
+    df = df.fillna (value = 'None')
+
+    missing_value = df["all_adult_hospital_beds_7_day_avg"] < 0
+    df["all_adult_hospital_beds_7_day_avg"][missing_value] = None
+
+    missing_value = df["all_pediatric_inpatient_beds_7_day_avg"] < 0
+    df["all_pediatric_inpatient_beds_7_day_avg"][missing_value] = None
+
+    missing_value = df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0
+    df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"][missing_value] = None
+
+    missing_value = df["total_icu_beds_7_day_avg"] < 0
+    df["total_icu_beds_7_day_avg"][missing_value] = None
+
+    missing_value = df["icu_beds_used_7_day_avg"] < 0
+    df["icu_beds_used_7_day_avg"][missing_value] = None
+
+    missing_value = df["inpatient_beds_used_covid_7_day_avg"] < 0
+    df["inpatient_beds_used_covid_7_day_avg"][missing_value] = None
+
+    missing_value = df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0
+    df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"][missing_value] = None
 
     # Clean the data here (remove NA. -999, etc.)
-    # long, lat = df.geocoded_hospital_address.apply(format_geocode())
+    
+    long, lat = format_geocode(file_path)
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
     clean_df["collection_date"] = pd.to_datetime(df["collection_week"],
@@ -74,8 +98,8 @@ def clean_hhs_data(file_path):
     clean_df["COVID_ICU_use"] = df[
         "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"]
     clean_df["fips"] = df["fips_code"]
-    # Need to extract from geocoded_hospital_address
-    clean_df["latitude"] = None  # lat
-    clean_df["longitude"] = None  # long
+    clean_df["address"] = df["geocoded_hospital_address"]
+    clean_df["latitude"] = lat  
+    clean_df["longitude"] = long  
 
     return clean_df
