@@ -14,7 +14,7 @@ collect_date = str(sys.argv[1])
 collect_date = datetime.datetime.strptime(collect_date, "%Y-%m-%d")
 
 # Subset data to insert (Testing Purposes)
-insert_data = insert_data.iloc[0:10, ]
+insert_data = insert_data.iloc[0:5, ]
 print(insert_data)
 
 # Start Insertion
@@ -27,6 +27,7 @@ with conn.transaction():
         data = insert_data.loc[int(i), ]
         try:
             with conn.transaction():
+                print("loading line " + str(i))  # Temporary debug code
                 load_hospital_info(conn, data, collect_date)
         except Exception:
             failed_insertion.append(i)

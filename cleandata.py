@@ -34,8 +34,8 @@ def clean_quality_data(file_path):
     df = pd.read_csv(file_path)
     clean_df = pd.DataFrame()
 
-    missing = df["Hospital overall rating"] == "Not Available"
-    df["Hospital overall rating"][missing] = None
+    # missing = df["Hospital overall rating"] == "Not Available"
+    df.loc[df["Hospital overall rating"] == "Not Available"] = None
 
     clean_df["hospital_id"] = df["Facility ID"].astype("str")
     clean_df["name"] = df["Facility Name"].astype("str")
