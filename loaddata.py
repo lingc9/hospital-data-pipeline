@@ -4,14 +4,29 @@ Functions that connect to psql server and load the data
 
 connect_to_sql - creats a connection to postgresql
 
-load_hospital_info - load a row of data into hospital_info table
+load_hospital_data - insert a row of data into hospital_data
 
-load_hospital_data - load a row of data into hospital_data table
+load_hospital_info - insert or update a row of data into hospital_info
 
-load_hospital_location - load a row of data into hospital_location table
+load_hospital_location - insert or update a row of data into hospital_location
 
+update_hospital_info - update a hospital's inforamtion in hospital_info
+
+update_hospital_location - update a hospital's location in hospital_location
+
+insert_hospital_info - insert a new hospital to hospital_info
+
+insert_hospital_location - insert a new hospital to hospital_location
+
+check_hospital_info - check if a hospital exist in hospital_info
+
+check_hospital_location - check if a hospital exist in hospital_location
 
 Arguments:
+
+dict_info - dictionary containing all hospital id from hospital_info
+
+dict_location - dictionary containing all hospital id from hospital_location
 
 conn - psycopg connect to postgresql server
 
@@ -33,7 +48,7 @@ def connect_to_sql():
     return conn
 
 
-def load_hospital_info(conn, data, collect_date):
+def insert_hospital_info(conn, data, collect_date):
     cur = conn.cursor()
 
     cur.execute("INSERT INTO hospital_info (hospital_id, name, hospital_type, "
@@ -91,7 +106,7 @@ def load_hospital_data(conn, data, collect_date):
     return True
 
 
-def load_hospital_location(conn, data, collect_date):
+def insert_hospital_location(conn, data, collect_date):
     cur = conn.cursor()
 
     cur.execute("INSERT INTO hospital_location (hospital_id, "
@@ -106,5 +121,44 @@ def load_hospital_location(conn, data, collect_date):
                  "longitude": data["longitude"]
                 }
                 )
+
+    return True
+
+
+def update_hospital_info(conn, data, collect_date):
+    pass
+
+
+def update_hospital_location(conn, data, collect_date):
+    pass
+
+
+def check_hospital_info(conn, data):
+    # Should take in a dictionary of hospitals as argument
+    # dict_info
+    return False
+
+
+def check_hospital_location(conn, data):
+    # dict_location
+    return False
+
+
+def load_hospital_info(conn, data, collect_date):
+    if check_hospital_info(conn, data):  # Check if the hospital exist
+        update_hospital_info(conn, data, collect_date)
+
+    else:
+        insert_hospital_info(conn, data, collect_date)
+
+    return True
+
+
+def load_hospital_location(conn, data, collect_date):
+    if check_hospital_location(conn, data):  # Check if the hospital exist
+        update_hospital_location(conn, data, collect_date)
+
+    else:
+        insert_hospital_location(conn, data, collect_date)
 
     return True
