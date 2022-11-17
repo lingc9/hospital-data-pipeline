@@ -20,7 +20,7 @@ data - a row of pd data frame containing the data to be inserted
 collect_date - the date when the quality file is collected
 """
 
-import psycopg2 as psycopg
+import psycopg
 
 import credentials
 
