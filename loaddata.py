@@ -153,38 +153,38 @@ def create_dict(conn, table):
     #         d[key] = [value]
 
 
-def update_hospital_info(conn, table, data):
+def update_hospital_info(conn, table, data, collect_date):
+    cur = conn.cursor()
     exist_id = check_hospital_id(conn, table, data)
     to_update = data[data["hospital_id"].isin(exist_id)]
 
-    engine_str1 = 'postgresql+psycopg2://'
-    engine_str2 = f'{cred.DB_USER}:{cred.DB_PASSWORD}'
-    engine_str3 = '@sculptor.stat.cmu.edu'
-    engine_str = f'{engine_str1}{engine_str2}{engine_str3}'
-
-    engine = create_engine(engine_str)
-
-    to_update.to_sql('temp_table', engine, if_exists='replace')
-
-    sql = """
+    cur.execute("""
         UPDATE hospital_info AS f
-        SET hospital_id = t.hospital_id,
-            name = t.name,
-            hospital_type = t.hospital_type,
-            ownership = t.ownership,
-            collection_date = t.ownership,
-            state = t.state,
-            address = t.state,
-            city = t.city,
-            zip = t.zip,
-            emergency_service = t.emergency_service,
-            quality_rating = t.quality_rating
-        FROM temp_table AS t
-        WHERE f.hospital_id = t.hosptial_id
-        """
-
-    with engine.begin() as conn:     # TRANSACTION
-        conn.execute(sql)
+        SET hospital_id = %(hospital_id)s,
+            name = %(name)s,
+            hospital_type = %(hospital_type)s,
+            ownership = %(ownership)s,
+            collection_date = %(collect_date)s,
+            state = %(state)s,
+            address = %(address)s,
+            city = %(city)s,
+            zip = %(zip)s,
+            emergency_service = %(emergency_service)s,
+            quality_rating = %(quality_rating)s
+        WHERE f.hospital_id = %(hospital_id)s
+        """,
+                {"hospital_id": to_update["hospital_id"],
+                 "name": to_update["name"],
+                 "hospital_type": to_update["hospital_type"],
+                 "ownership": to_update["ownership"],
+                 "collection_date": collect_date,
+                 "state": to_update["state"],
+                 "address": to_update["address"],
+                 "city": to_update["city"],
+                 "zip": to_update["zip"],
+                 "emergency_service": to_update["emergency_service"],
+                 "quality_rating": to_update["quality_rating"],
+                 })
 
 
 def update_hospital_location(conn, data):
