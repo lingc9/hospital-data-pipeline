@@ -215,9 +215,6 @@ def update_hospital_location(conn, data):
         "fips = %(state)s,"
         "latitude = %(address)s,"
         "longitutde = %(city)s,"
-        "zip = %(zip)s,"
-        "emergency_service = %(emergency_service)s,"
-        "quality_rating = %(quality_rating)s"
         "WHERE f.hospital_id = %(hospital_id)s",
         {"hospital_id": data["hospital_id"],
          "collection_date": data["collection_date"],
