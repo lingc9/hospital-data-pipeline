@@ -3,9 +3,11 @@
 import sys
 import time
 import datetime
+import warnings
 from cleandata import clean_quality_data
 from loaddata import connect_to_sql, load_hospital_info
 
+warnings.filterwarnings("ignore")
 
 nfile = "./data/hospital_quality/" + str(sys.argv[2])
 insert_data = clean_quality_data(nfile)
@@ -14,8 +16,8 @@ collect_date = str(sys.argv[1])
 collect_date = datetime.datetime.strptime(collect_date, "%Y-%m-%d")
 
 # Subset data to insert (Testing Purposes)
-insert_data = insert_data.iloc[0:10, ]
-print(insert_data)
+insert_data = insert_data.iloc[0:50, ]
+# print(insert_data)
 
 # Start Insertion
 num_rows_inserted = 0

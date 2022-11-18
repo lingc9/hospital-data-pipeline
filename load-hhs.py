@@ -2,8 +2,11 @@
 
 import sys
 import time
+import warnings
 from cleandata import clean_hhs_data
 from loaddata import connect_to_sql, load_hospital_data, load_hospital_location
+
+warnings.filterwarnings("ignore")
 
 nfile = "./data/hhs_weekly/" + str(sys.argv[1])
 insert_data = clean_hhs_data(nfile)
@@ -21,20 +24,22 @@ conn = connect_to_sql()
 with conn.transaction():
     for i in range(insert_data.shape[0]):
         data = insert_data.loc[int(i), ]
-        try:
-            with conn.transaction():
-                load_hospital_data(conn, data)
-        except Exception:
-            failed_insertion_data.append(i)
-            print("Insertion into hospital_data failed at line " + str(i))
-        try:
-            with conn.transaction():
-                load_hospital_location(conn, data)
-        except Exception:
-            failed_insertion_location.append(i)
-            print("Insertion into hospital_location failed at line " + str(i))
-        else:
-            num_rows_inserted += 1
+        # try:
+        with conn.transaction():
+            print("loading data line " + str(i))
+            load_hospital_data(conn, data)
+        # except Exception:
+            # failed_insertion_data.append(i)
+            # print("Insertion into hospital_data failed at line " + str(i))
+        # try:
+        with conn.transaction():
+            print("loading location line " + str(i))
+            load_hospital_location(conn, "hospital_location", data)
+        # except Exception:
+            # failed_insertion_location.append(i)
+            # print("Insertion into hospital_location failed at line " + str(i))
+        # else:
+        num_rows_inserted += 1
 
 print("Read in " + str(insert_data.shape[0]) + " lines in total")
 print("Successfully added " + str(num_rows_inserted))

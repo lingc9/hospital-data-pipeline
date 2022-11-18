@@ -208,6 +208,8 @@ def update_hospital_info(conn, data, collect_date):
 def update_hospital_location(conn, data):
     cur = conn.cursor()
 
+    print(data)
+
     cur.execute(
         "UPDATE hospital_location AS f "
         "SET hospital_id = %(hospital_id)s,"
@@ -236,12 +238,6 @@ def check_hospital_id(conn, table, data):
     return exists
 
 
-def check_hospital_location(conn, data):
-    # dict_location
-    # Unnecessary?
-    return False
-
-
 def load_hospital_info(conn, table, data, collect_date):
     """Helper function to load the hospital data
     Parameters:
@@ -267,8 +263,10 @@ def load_hospital_location(conn, table, data):
     existing_hosp = check_hospital_id(conn, table, data)
 
     if len(existing_hosp) == 0:
+        print("inserting new hospital")
         insert_hospital_location(conn, data)
     else:  # When array of existing hospital is not empty, update
+        print("updating existing hospital")
         update_hospital_location(conn, data)
 
     return True

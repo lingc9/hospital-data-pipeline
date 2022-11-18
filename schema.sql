@@ -36,19 +36,19 @@ CREATE TABLE hospital_data (
 	id SERIAL PRIMARY KEY,
 	hospital_id TEXT NOT NULL,
 	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
-	avalible_adult_beds INT CHECK(avalible_adult_beds >= 0),
-	avalible_pediatric_beds INT CHECK(avalible_pediatric_beds >= 0), 
-	occupied_adult_beds INT CHECK(occupied_adult_beds >= 0),
-	occupied_pediatric_beds INT CHECK(occupied_pediatric_beds >= 0),
-	available_ICU_beds INT CHECK(available_ICU_beds >= 0),
-	occupied_ICU_beds INT CHECK(occupied_ICU_beds >= 0),
-	COVID_beds_use INT CHECK(COVID_beds_use >= 0),
-	COVID_ICU_use INT CHECK(COVID_ICU_use >= 0), 
-	-- CHECK(avalible_adult_beds >= occupied_adult_beds), 
-	-- CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
-	-- CHECK(available_ICU_beds >= occupied_ICU_beds), 
-	-- CHECK(available_ICU_beds >= COVID_ICU_use),
-	-- CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
+	avalible_adult_beds DECIMAL CHECK(avalible_adult_beds >= 0),
+	avalible_pediatric_beds DECIMAL CHECK(avalible_pediatric_beds >= 0), 
+	occupied_adult_beds DECIMAL CHECK(occupied_adult_beds >= 0),
+	occupied_pediatric_beds DECIMAL CHECK(occupied_pediatric_beds >= 0),
+	available_ICU_beds DECIMAL CHECK(available_ICU_beds >= 0),
+	occupied_ICU_beds DECIMAL CHECK(occupied_ICU_beds >= 0),
+	COVID_beds_use DECIMAL CHECK(COVID_beds_use >= 0),
+	COVID_ICU_use DECIMAL CHECK(COVID_ICU_use >= 0)
+	--CHECK(avalible_adult_beds >= occupied_adult_beds), 
+	--CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
+	--CHECK(available_ICU_beds >= occupied_ICU_beds), 
+	--CHECK(available_ICU_beds >= COVID_ICU_use),
+	--CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
 );
 
 CREATE TABLE hospital_info (
@@ -66,7 +66,7 @@ CREATE TABLE hospital_info (
 );
 
 CREATE TABLE hospital_location (
-	hospital_id TEXT PRIMARY KEY NOT NULL REFERENCES hospital_info(hospital_id),
+	hospital_id TEXT PRIMARY KEY NOT NULL,
 	collection_date DATE CHECK(collection_date <= CURRENT_DATE) NOT NULL,
 	fips CHAR(5),
 	latitude DECIMAL, 
