@@ -78,7 +78,7 @@ def insert_hospital_info(conn, data, collect_date):
     return True
 
 
-def load_hospital_data(conn, data, collect_date):
+def load_hospital_data(conn, data):
     cur = conn.cursor()
 
     cur.execute("INSERT INTO hospital_data (hospital_id, collection_date, "
@@ -108,7 +108,7 @@ def load_hospital_data(conn, data, collect_date):
     return True
 
 
-def insert_hospital_location(conn, data, collect_date):
+def insert_hospital_location(conn, data):
     cur = conn.cursor()
 
     cur.execute("INSERT INTO hospital_location (hospital_id, "
@@ -153,7 +153,7 @@ def create_dict(conn, table):
     #         d[key] = [value]
 
 
-def update_hospital_info(conn, table, data, collect_date):
+def update_hospital_info(conn, table, data):
     exist_id = check_hospital_id(conn, table, data)
     to_update = data[data["hospital_id"].isin(exist_id)]
 
@@ -187,7 +187,7 @@ def update_hospital_info(conn, table, data, collect_date):
         conn.execute(sql)
 
 
-def update_hospital_location(conn, data, collect_date):
+def update_hospital_location(conn, data):
     pass
 
 
@@ -215,20 +215,22 @@ def load_hospital_info(conn, table, data, collect_date):
         collect_date: the collection date"""
     existing_hosp = check_hospital_id(conn, table, data)
     if existing_hosp:  # When array of existing hospital is not empty, update
+        print("found existing hospital")
         update_hospital_info(conn, table, data, collect_date)
 
     else:  # Otherwise, insert
+        print("adding existing hospital")
         insert_hospital_info(conn, data, collect_date)
 
     return True
 
 
-def load_hospital_location(conn, table, data, collect_date):
+def load_hospital_location(conn, table, data):
     existing_hosp = check_hospital_id(conn, table, data)
     if existing_hosp:  # When array of existing hospital is not empty, update
-        update_hospital_location(conn, table, data, collect_date)
+        update_hospital_location(conn, table, data)
 
     else:  # Otherwise, insert
-        insert_hospital_location(conn, data, collect_date)
+        insert_hospital_location(conn, data)
 
     return True
