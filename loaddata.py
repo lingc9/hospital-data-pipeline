@@ -133,6 +133,12 @@ def check_table_exists(conn, tablename):
         FROM information_schema.tables
         WHERE table_name = '{0}'
         """.format(tablename.replace('\'', '\'\'')))
+    if cur.fetchone()[0] == 1:
+        cur.close()
+        return True
+
+    cur.close()
+    return False
 
 
 def create_dict(conn, table):
