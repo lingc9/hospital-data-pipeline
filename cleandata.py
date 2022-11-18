@@ -18,16 +18,25 @@ clean_hhs_data - converts and cleans hospital general information data
 
 Argumemts:
 file_path - directory to where the csv file is stored, in string
+
+
+format_geocode - changes geocode from PONT() to latitude and longitude
+
+Arguments:
+geocode - String like this "POINT (longitude, latitude)"
 """
 
 import pandas as pd
 
 
-def format_geocode(code):
-    # Turn 'POINT (-91.145057 30.655648)'
-    # Into longitude = -91.145057
-    #      latitude = 30.655648
-    pass
+def format_geocode(geocode):
+    ans = geocode.strip("POINT (")
+    ans = ans.strip(")")
+    list = ans.split(" ")
+
+    long = float(list[0])
+    lat = float(list[1])
+    return long, lat
 
 
 def clean_quality_data(file_path):
@@ -74,8 +83,8 @@ def clean_hhs_data(file_path):
     clean_df["COVID_ICU_use"] = df[
         "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"]
     clean_df["fips"] = df["fips_code"]
-    # Need to extract from geocoded_hospital_address
-    clean_df["latitude"] = None  # lat
-    clean_df["longitude"] = None  # long
+    long, lat = format_geocode(df["geocoded_hospital_address"])
+    clean_df["latitude"] = lat
+    clean_df["longitude"] = long
 
     return clean_df
