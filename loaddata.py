@@ -128,12 +128,24 @@ def insert_hospital_location(conn, data):
 
 def check_table_exists(conn, tablename):
     cur = conn.cursor()
-    cur.execute("""
-        SELECT COUNT(*)
-        FROM information_schema.tables
-        WHERE table_name = '{0}'
-        """.format(tablename.replace('\'', '\'\'')))
-    if cur.fetchone()[0] == 1:
+    # cur.execute("""
+        # SELECT COUNT(*)
+        # FROM information_schema.tables
+        # WHERE table_name = '{0}'
+        # """.format(tablename.replace('\'', '\'\'')))
+    if tablename == "hospital_info":
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM hospital_info""")
+    elif tablename == "hospital_location":
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM hospital_location""")
+
+    nrow = cur.fetchone()[0]
+    print(nrow)
+
+    if nrow != 0:
         cur.close()
         return True
 
