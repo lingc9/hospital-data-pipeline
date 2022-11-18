@@ -128,29 +128,11 @@ def insert_hospital_location(conn, data):
 
 def check_table_exists(conn, tablename):
     cur = conn.cursor()
-    # cur.execute("""
-        # SELECT COUNT(*)
-        # FROM information_schema.tables
-        # WHERE table_name = '{0}'
-        # """.format(tablename.replace('\'', '\'\'')))
-    if tablename == "hospital_info":
-        cur.execute("""
-            SELECT COUNT(*)
-            FROM hospital_info""")
-    elif tablename == "hospital_location":
-        cur.execute("""
-            SELECT COUNT(*)
-            FROM hospital_location""")
-
-    nrow = cur.fetchone()[0]
-    print(nrow)
-
-    if nrow != 0:
-        cur.close()
-        return True
-
-    cur.close()
-    return False
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_name = '{0}'
+        """.format(tablename.replace('\'', '\'\'')))
 
 
 def create_dict(conn, table):
@@ -190,8 +172,8 @@ def update_hospital_info(conn, data, collect_date):
     # to_update = data[data["hospital_id"]]
 
     cur.execute(
-        "UPDATE hospital_info AS f"
-        " SET hospital_id = %(hospital_id)s,"
+        "UPDATE hospital_info AS f "
+        "SET hospital_id = %(hospital_id)s,"
         "name = %(name)s,"
         "hospital_type = %(hospital_type)s,"
         "ownership = %(ownership)s,"
@@ -218,7 +200,25 @@ def update_hospital_info(conn, data, collect_date):
 
 
 def update_hospital_location(conn, data):
-    pass
+    cur = conn.cursor()
+
+    cur.execute(
+        "UPDATE hospital_location AS f "
+        "SET hospital_id = %(hospital_id)s,"
+        "collection_date = %(collect_date)s,"
+        "fips = %(state)s,"
+        "latitude = %(address)s,"
+        "longitutde = %(city)s,"
+        "zip = %(zip)s,"
+        "emergency_service = %(emergency_service)s,"
+        "quality_rating = %(quality_rating)s"
+        "WHERE f.hospital_id = %(hospital_id)s",
+        {"hospital_id": data["hospital_id"],
+         "collection_date": data["collection_date"],
+         "fips": data["fips"],
+         "latitude": data["latitude"],
+         "longitude": data["longitude"]
+         })
 
 
 def check_hospital_id(conn, table, data):
@@ -244,7 +244,6 @@ def load_hospital_info(conn, table, data, collect_date):
     Parameters:
         data: a pd dataframe of information we have read out of the .csv file
         collect_date: the collection date"""
-    print("before if")
     if check_table_exists(conn, table) is False:
         raise ValueError("Table %s does not exist" % table)
 
@@ -259,11 +258,14 @@ def load_hospital_info(conn, table, data, collect_date):
 
 
 def load_hospital_location(conn, table, data):
-    existing_hosp = check_hospital_id(conn, table, data)
-    if existing_hosp:  # When array of existing hospital is not empty, update
-        update_hospital_location(conn, table, data)
+    if check_table_exists(conn, table) is False:
+        raise ValueError("Table %s does not exist" % table)
 
-    else:  # Otherwise, insert
+    existing_hosp = check_hospital_id(conn, table, data)
+
+    if len(existing_hosp) == 0:
         insert_hospital_location(conn, data)
+    else:  # When array of existing hospital is not empty, update
+        update_hospital_location(conn, data)
 
     return True
