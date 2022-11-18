@@ -128,12 +128,24 @@ def insert_hospital_location(conn, data):
 
 def check_table_exists(conn, tablename):
     cur = conn.cursor()
-    cur.execute("""
-        SELECT COUNT(*)
-        FROM information_schema.tables
-        WHERE table_name = '{0}'
-        """.format(tablename.replace('\'', '\'\'')))
-    if cur.fetchone()[0] == 1:
+    # cur.execute("""
+        # SELECT COUNT(*)
+        # FROM information_schema.tables
+        # WHERE table_name = '{0}'
+        # """.format(tablename.replace('\'', '\'\'')))
+    if tablename == "hospital_info":
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM hospital_info""")
+    elif tablename == "hospital_location":
+        cur.execute("""
+            SELECT COUNT(*)
+            FROM hospital_location""")
+
+    nrow = cur.fetchone()[0]
+    print(nrow)
+
+    if nrow != 0:
         cur.close()
         return True
 
@@ -145,8 +157,11 @@ def create_dict(conn, table):
     """Create a dictionary by hospital_id as the key from pre-existing
     hopital_info table with remaining columns as dictionary values."""
 
-    d = pd.read_sql_query("SELECT * FROM %s" % table, conn)
-    sql_dict = d.set_index("hosptial_id").to_dict('index')
+    print("start")
+    d = pd.read_sql_query("SELECT hospital_id FROM %s" % table, conn)
+    print(d)
+    sql_dict = d.set_index("hosptial_id")['hospital_id'].to_dict()
+    print(sql_dict)
 
     return sql_dict
 
@@ -227,12 +242,8 @@ def load_hospital_info(conn, table, data, collect_date):
     Parameters:
         data: a pd dataframe of information we have read out of the .csv file
         collect_date: the collection date"""
-    print("before if")
-    if check_table_exists(conn, table):
-        existing_hosp = check_hospital_id(conn, table, data)
-        print("why check")
-    else:
-        insert_hospital_info(conn, data, collect_date)
+
+    existing_hosp = check_table_exists(conn, table)
 
     if existing_hosp:  # When array of existing hospital is not empty, update
         print("found existing hospital")
