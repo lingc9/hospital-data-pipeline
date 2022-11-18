@@ -64,29 +64,29 @@ def clean_hhs_data(file_path):
     df = pd.read_csv(file_path)
     clean_df = pd.DataFrame()
 
-    df = df.fillna(value='None')
-
-    missing_value = df["all_adult_hospital_beds_7_day_avg"] < 0
+    df = df.replace("NA",None)
+    df = df.replace("NULL",None)
+    missing_value = df["all_adult_hospital_beds_7_day_avg"] = -999999
     df["all_adult_hospital_beds_7_day_avg"][missing_value] = None
 
-    missing_value = df["all_pediatric_inpatient_beds_7_day_avg"] < 0
+    missing_value = df["all_pediatric_inpatient_beds_7_day_avg"] = -999999
     df["all_pediatric_inpatient_beds_7_day_avg"][missing_value] = None
 
     missing_value =\
-        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0
+        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] = -999999
     df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"][missing_value] = None
 
-    missing_value = df["total_icu_beds_7_day_avg"] < 0
+    missing_value = df["total_icu_beds_7_day_avg"] = -999999
     df["total_icu_beds_7_day_avg"][missing_value] = None
 
-    missing_value = df["icu_beds_used_7_day_avg"] < 0
+    missing_value = df["icu_beds_used_7_day_avg"] = -999999
     df["icu_beds_used_7_day_avg"][missing_value] = None
 
-    missing_value = df["inpatient_beds_used_covid_7_day_avg"] < 0
+    missing_value = df["inpatient_beds_used_covid_7_day_avg"] = -999999
     df["inpatient_beds_used_covid_7_day_avg"][missing_value] = None
 
     missing_value =\
-        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0
+        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] = -999999
     df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"][missing_value] = None
 
     # Clean the data here (remove NA. -999, etc.)
@@ -110,8 +110,8 @@ def clean_hhs_data(file_path):
     clean_df["fips"] = df["fips_code"]
     clean_df["address"] = df["address"]
     gcode = df.geocoded_hospital_address
-    long = gcode.apply(lambda x: x.strip("POINT ( )").split(" ")[0])
-    lat = gcode.apply(lambda x: x.strip("POINT ( )").split(" ")[1])
+    long = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[0])
+    lat = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[-1])
     clean_df["latitude"] = lat
     clean_df["longitude"] = long
 
