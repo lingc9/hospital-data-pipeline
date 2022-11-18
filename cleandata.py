@@ -56,8 +56,10 @@ def clean_hhs_data(file_path):
     df["all_pediatric_inpatient_beds_7_day_avg"][missing_value] = None
 
     missing_value =\
-        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] == -999999
-    df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"][missing_value] = None
+        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"
+           ] == -999999
+    df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"
+       ][missing_value] = None
 
     missing_value = df["total_icu_beds_7_day_avg"] == -999999
     df["total_icu_beds_7_day_avg"][missing_value] = None
@@ -69,9 +71,11 @@ def clean_hhs_data(file_path):
     df["inpatient_beds_used_covid_7_day_avg"][missing_value] = None
 
     missing_value =\
-        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] == -999999
+        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"
+           ] == -999999
 
-    df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"][missing_value] = None
+    df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"
+       ][missing_value] = None
 
     missing_value =\
         df["all_pediatric_inpatient_bed_occupied_7_day_avg"] == -999999
@@ -80,26 +84,46 @@ def clean_hhs_data(file_path):
     # Clean the data here (remove NA. -999, etc.)
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
+
     clean_df["collection_date"] = pd.to_datetime(df["collection_week"],
                                                  format="%Y-%m-%d")
-    clean_df["avalible_adult_beds"] = df["all_adult_hospital_beds_7_day_avg"].astype("float")
+
+    clean_df["avalible_adult_beds"] = df["all_adult_hospital_beds_7_day_avg"
+                                         ].astype("float")
+
     clean_df["avalible_pediatric_beds"] = df[
         "all_pediatric_inpatient_beds_7_day_avg"].astype("float")
+
     clean_df["occupied_adult_beds"] = df[
-        "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"].astype("float")
+             "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"
+            ].astype("float")
+
     clean_df["occupied_pediatric_beds"] = df[
         "all_pediatric_inpatient_bed_occupied_7_day_avg"].astype("float")
-    clean_df["available_ICU_beds"] = df["total_icu_beds_7_day_avg"].astype("float")
-    clean_df["occupied_ICU_beds"] = df["icu_beds_used_7_day_avg"].astype("float")
-    clean_df["COVID_beds_use"] = df["inpatient_beds_used_covid_7_day_avg"].astype("float")
+
+    clean_df["available_ICU_beds"] = df[
+             "total_icu_beds_7_day_avg"
+            ].astype("float")
+
+    clean_df["occupied_ICU_beds"] = df[
+             "icu_beds_used_7_day_avg"
+            ].astype("float")
+
+    clean_df["COVID_beds_use"] = df[
+             "inpatient_beds_used_covid_7_day_avg"
+            ].astype("float")
+
     clean_df["COVID_ICU_use"] = df[
-        "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"].astype("float")
+             "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"
+            ].astype("float")
 
     clean_df["fips"] = df["fips_code"].astype("float")
     clean_df["address"] = df["address"].astype("str")
     gcode = df.geocoded_hospital_address
-    long = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[0]).astype("float")
-    lat = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[-1]).astype("float")
+    long = gcode.apply(lambda x:
+                       str(x).strip("POINT ( )").split(" ")[0]).astype("float")
+    lat = gcode.apply(lambda x:
+                      str(x).strip("POINT ( )").split(" ")[-1]).astype("float")
 
     clean_df["latitude"] = lat
     clean_df["longitude"] = long

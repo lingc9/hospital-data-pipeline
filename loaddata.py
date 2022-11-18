@@ -225,16 +225,18 @@ def load_hospital_info(conn, table, data, collect_date):
         data: a pd dataframe of information we have read out of the .csv file
         collect_date: the collection date
     """
-
+    # print("check if table exist")
     if check_table_exists(conn, table) is False:
         raise ValueError("Table %s does not exist" % table)
 
     existing_hosp = check_hospital_id(conn, table, data)
 
     if len(existing_hosp) == 0:
+        # print("insert")
         insert_hospital_info(conn, data, collect_date)
         return 1
     else:  # When array of existing hospital is not empty, update
+        # print("update")
         update_hospital_info(conn, data, collect_date)
         return 0
 

@@ -3,6 +3,7 @@
 import sys
 import time
 import warnings
+import pandas as pd
 from cleandata import clean_hhs_data
 from loaddata import connect_to_sql, load_hospital_data, load_hospital_location
 
@@ -12,7 +13,7 @@ nfile = "./data/hhs_weekly/" + str(sys.argv[1])
 insert_data = clean_hhs_data(nfile)
 
 # Subset data to insert (Testing Purposes)
-# insert_data = insert_data.iloc[0:10, ]
+insert_data = insert_data.iloc[0:10, ]
 # print(insert_data)
 
 print("Detect " + str(len(insert_data)) + " rows of data")
@@ -49,14 +50,16 @@ print("Added " + str(new_hospital) + " new hospitals")
 
 # Output csv with lines that failed to insert
 if failed_insertion_data:
-    failed_lines = insert_data.iloc[failed_insertion_data]
+    orginal_df = pd.read_csv(nfile)
+    failed_lines = orginal_df.iloc[failed_insertion_data]
     curr_time = time.strftime("%H_%M_%S", time.localtime())
     fname = "./data/hhs_weekly/" + curr_time + "_failed_insertion_data.csv"
     failed_lines.to_csv(fname)
     print("Saved lines that failed to insert in " + fname)
 
 if failed_insertion_location:
-    failed_lines = insert_data.iloc[failed_insertion_location]
+    orginal_df = pd.read_csv(nfile)
+    failed_lines = orginal_df.iloc[failed_insertion_location]
     curr_time = time.strftime("%H_%M_%S", time.localtime())
     fname = "./data/hhs_weekly/" + curr_time + "_failed_insertion_loca.csv"
     failed_lines.to_csv(fname)
