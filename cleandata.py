@@ -70,6 +70,7 @@ def clean_hhs_data(file_path):
 
     missing_value =\
         df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] == -999999
+
     df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"][missing_value] = None
 
     missing_value =\
@@ -93,11 +94,13 @@ def clean_hhs_data(file_path):
     clean_df["COVID_beds_use"] = df["inpatient_beds_used_covid_7_day_avg"].astype("float")
     clean_df["COVID_ICU_use"] = df[
         "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"].astype("float")
+
     clean_df["fips"] = df["fips_code"].astype("float")
     clean_df["address"] = df["address"].astype("str")
     gcode = df.geocoded_hospital_address
     long = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[0]).astype("float")
     lat = gcode.apply(lambda x: str(x).strip("POINT ( )").split(" ")[-1]).astype("float")
+
     clean_df["latitude"] = lat
     clean_df["longitude"] = long
 
