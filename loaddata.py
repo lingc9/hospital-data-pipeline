@@ -126,6 +126,21 @@ def insert_hospital_location(conn, data):
     return True
 
 
+def check_table_exists(conn, tablename):
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_name = '{0}'
+        """.format(tablename.replace('\'', '\'\'')))
+    if cur.fetchone()[0] == 1:
+        cur.close()
+        return True
+
+    cur.close()
+    return False
+
+
 def create_dict(conn, table):
     """Create a dictionary by hospital_id as the key from pre-existing
     hopital_info table with remaining columns as dictionary values."""
@@ -212,11 +227,16 @@ def load_hospital_info(conn, table, data, collect_date):
     Parameters:
         data: a pd dataframe of information we have read out of the .csv file
         collect_date: the collection date"""
-    existing_hosp = check_hospital_id(conn, table, data)
+    print("before if")
+    if check_table_exists(conn, table):
+        existing_hosp = check_hospital_id(conn, table, data)
+        print("why check")
+    else:
+        insert_hospital_info(conn, data, collect_date)
+
     if existing_hosp:  # When array of existing hospital is not empty, update
         print("found existing hospital")
         update_hospital_info(conn, table, data, collect_date)
-
     else:  # Otherwise, insert
         print("adding existing hospital")
         insert_hospital_info(conn, data, collect_date)
