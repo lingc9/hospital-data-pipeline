@@ -154,28 +154,9 @@ def create_dict(conn, table):
 
     return sql_dict
 
-    # Implementation through the psycopg library
-    # cur = conn.cursor()
-
-    # cur.execute("SELECT * FROM hospital_info ")
-
-    # rows = cur.fetchall()
-
-    # d = {}
-    # for row in rows:
-    #     key = row[0]
-    #     value = row[1:]
-    #     try:
-    #         d[key].append(value)
-    #     except KeyError:
-    #         d[key] = [value]
-
 
 def update_hospital_info(conn, data, collect_date):
     cur = conn.cursor()
-    # exist_id = check_hospital_id(conn, table, data)
-    # print()
-    # to_update = data[data["hospital_id"]]
 
     cur.execute(
         "UPDATE hospital_info AS f "
@@ -208,15 +189,13 @@ def update_hospital_info(conn, data, collect_date):
 def update_hospital_location(conn, data):
     cur = conn.cursor()
 
-    print(data)
-
     cur.execute(
         "UPDATE hospital_location AS f "
         "SET hospital_id = %(hospital_id)s,"
-        "collection_date = %(collect_date)s,"
-        "fips = %(state)s,"
-        "latitude = %(address)s,"
-        "longitutde = %(city)s,"
+        "collection_date = %(collection_date)s,"
+        "fips = %(fips)s,"
+        "latitude = %(latitude)s,"
+        "longitude = %(longitude)s"
         "WHERE f.hospital_id = %(hospital_id)s",
         {"hospital_id": data["hospital_id"],
          "collection_date": data["collection_date"],
@@ -239,10 +218,14 @@ def check_hospital_id(conn, table, data):
 
 
 def load_hospital_info(conn, table, data, collect_date):
-    """Helper function to load the hospital data
+    """
+    Helper function to load the hospital data
+
     Parameters:
         data: a pd dataframe of information we have read out of the .csv file
-        collect_date: the collection date"""
+        collect_date: the collection date
+    """
+
     if check_table_exists(conn, table) is False:
         raise ValueError("Table %s does not exist" % table)
 
@@ -250,10 +233,10 @@ def load_hospital_info(conn, table, data, collect_date):
 
     if len(existing_hosp) == 0:
         insert_hospital_info(conn, data, collect_date)
+        return 1
     else:  # When array of existing hospital is not empty, update
         update_hospital_info(conn, data, collect_date)
-
-    return True
+        return 0
 
 
 def load_hospital_location(conn, table, data):
@@ -263,10 +246,8 @@ def load_hospital_location(conn, table, data):
     existing_hosp = check_hospital_id(conn, table, data)
 
     if len(existing_hosp) == 0:
-        print("inserting new hospital")
         insert_hospital_location(conn, data)
+        return 1
     else:  # When array of existing hospital is not empty, update
-        print("updating existing hospital")
         update_hospital_location(conn, data)
-
-    return True
+        return 0
