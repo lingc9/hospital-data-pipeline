@@ -35,15 +35,17 @@ data - a row of pd data frame containing the data to be inserted
 collect_date - the date when the quality file is collected
 """
 
+from sqlalchemy import create_engine
 import psycopg
-
-import credentials
+import pandas as pd
+import numpy as np
+import credentials as cred
 
 
 def connect_to_sql():
     conn = psycopg.connect(
-        host="sculptor.stat.cmu.edu", dbname=credentials.DB_USER,
-        user=credentials.DB_USER, password=credentials.DB_PASSWORD
+        host="sculptor.stat.cmu.edu", dbname=cred.DB_USER,
+        user=cred.DB_USER, password=cred.DB_PASSWORD
     )
     return conn
 
@@ -125,40 +127,108 @@ def insert_hospital_location(conn, data, collect_date):
     return True
 
 
-def update_hospital_info(conn, data, collect_date):
-    pass
+def create_dict(conn, table):
+    """Create a dictionary by hospital_id as the key from pre-existing
+    hopital_info table with remaining columns as dictionary values."""
+
+    d = pd.read_sql_query("SELECT * FROM %s" % table, conn)
+    sql_dict = d.set_index("hosptial_id").to_dict('index')
+
+    return sql_dict
+
+    # Implementation through the psycopg library
+    # cur = conn.cursor()
+
+    # cur.execute("SELECT * FROM hospital_info ")
+
+    # rows = cur.fetchall()
+
+    # d = {}
+    # for row in rows:
+    #     key = row[0]
+    #     value = row[1:]
+    #     try:
+    #         d[key].append(value)
+    #     except KeyError:
+    #         d[key] = [value]
+
+
+def update_hospital_info(conn, table, data, collect_date):
+    exist_id = check_hospital_id(conn, table, data)
+    to_update = data[data["hospital_id"].isin(exist_id)]
+
+    engine_str1 = 'postgresql+psycopg2://'
+    engine_str2 = f'{cred.DB_USER}:{cred.DB_PASSWORD}'
+    engine_str3 = '@sculptor.stat.cmu.edu'
+    engine_str = f'{engine_str1}{engine_str2}{engine_str3}'
+
+    engine = create_engine(engine_str)
+
+    to_update.to_sql('temp_table', engine, if_exists='replace')
+
+    sql = """
+        UPDATE hospital_info AS f
+        SET hospital_id = t.hospital_id,
+            name = t.name,
+            hospital_type = t.hospital_type,
+            ownership = t.ownership,
+            collection_date = t.ownership,
+            state = t.state,
+            address = t.state,
+            city = t.city,
+            zip = t.zip,
+            emergency_service = t.emergency_service,
+            quality_rating = t.quality_rating
+        FROM temp_table AS t
+        WHERE f.hospital_id = t.hosptial_id
+        """
+
+    with engine.begin() as conn:     # TRANSACTION
+        conn.execute(sql)
 
 
 def update_hospital_location(conn, data, collect_date):
     pass
 
 
-def check_hospital_info(conn, data):
-    # Should take in a dictionary of hospitals as argument
-    # dict_info
-    return False
+def check_hospital_id(conn, table, data):
+    """Checks incoming data to see if new hospitals have been added and returns
+    an array of the pre-existing hospital ids."""
+    sql_dict = create_dict(conn, table)
+
+    ids = data["hospital_id"].unique()
+    exists = np.intersect1d(ids, sql_dict.keys())
+
+    return exists
 
 
 def check_hospital_location(conn, data):
     # dict_location
+    # Unnecessary?
     return False
 
 
-def load_hospital_info(conn, data, collect_date):
-    if check_hospital_info(conn, data):  # Check if the hospital exist
-        update_hospital_info(conn, data, collect_date)
+def load_hospital_info(conn, table, data, collect_date):
+    """Helper function to load the hospital data
+    Parameters:
+        data: a pd dataframe of information we have read out of the .csv file
+        collect_date: the collection date"""
+    existing_hosp = check_hospital_id(conn, table, data)
+    if existing_hosp:  # When array of existing hospital is not empty, update
+        update_hospital_info(conn, table, data, collect_date)
 
-    else:
+    else:  # Otherwise, insert
         insert_hospital_info(conn, data, collect_date)
 
     return True
 
 
-def load_hospital_location(conn, data, collect_date):
-    if check_hospital_location(conn, data):  # Check if the hospital exist
-        update_hospital_location(conn, data, collect_date)
+def load_hospital_location(conn, table, data, collect_date):
+    existing_hosp = check_hospital_id(conn, table, data)
+    if existing_hosp:  # When array of existing hospital is not empty, update
+        update_hospital_location(conn, table, data, collect_date)
 
-    else:
+    else:  # Otherwise, insert
         insert_hospital_location(conn, data, collect_date)
 
     return True
