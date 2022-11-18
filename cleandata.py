@@ -109,7 +109,9 @@ def clean_hhs_data(file_path):
         "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"]
     clean_df["fips"] = df["fips_code"]
     clean_df["address"] = df["address"]
-    long, lat = format_geocode(df["geocoded_hospital_address"])
+    gcode = df.geocoded_hospital_address
+    long = gcode.apply(lambda x: x.strip("POINT ( )").split(" ")[0])
+    lat = gcode.apply(lambda x: x.strip("POINT ( )").split(" ")[1])
     clean_df["latitude"] = lat
     clean_df["longitude"] = long
 
