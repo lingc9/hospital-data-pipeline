@@ -62,7 +62,7 @@ def clean_quality_data(file_path):
 
 def clean_hhs_data(file_path):
     df = pd.read_csv(file_path)
-    clean_df = pd.DataFrame(file_path)
+    clean_df = pd.DataFrame()
 
     df = df.fillna(value='None')
 
@@ -91,7 +91,6 @@ def clean_hhs_data(file_path):
 
     # Clean the data here (remove NA. -999, etc.)
 
-    long, lat = format_geocode(file_path)
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
     clean_df["collection_date"] = pd.to_datetime(df["collection_week"],
