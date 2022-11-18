@@ -64,7 +64,7 @@ def clean_hhs_data(file_path):
     df = pd.read_csv(file_path)
     clean_df = pd.DataFrame(file_path)
 
-    df = df.fillna (value = 'None')
+    df = df.fillna(value='None')
 
     missing_value = df["all_adult_hospital_beds_7_day_avg"] < 0
     df["all_adult_hospital_beds_7_day_avg"][missing_value] = None
@@ -72,7 +72,8 @@ def clean_hhs_data(file_path):
     missing_value = df["all_pediatric_inpatient_beds_7_day_avg"] < 0
     df["all_pediatric_inpatient_beds_7_day_avg"][missing_value] = None
 
-    missing_value = df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0
+    missing_value =\
+        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0
     df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"][missing_value] = None
 
     missing_value = df["total_icu_beds_7_day_avg"] < 0
@@ -84,11 +85,12 @@ def clean_hhs_data(file_path):
     missing_value = df["inpatient_beds_used_covid_7_day_avg"] < 0
     df["inpatient_beds_used_covid_7_day_avg"][missing_value] = None
 
-    missing_value = df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0
+    missing_value =\
+        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0
     df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"][missing_value] = None
 
     # Clean the data here (remove NA. -999, etc.)
-    
+
     long, lat = format_geocode(file_path)
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
@@ -107,7 +109,8 @@ def clean_hhs_data(file_path):
     clean_df["COVID_ICU_use"] = df[
         "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"]
     clean_df["fips"] = df["fips_code"]
-    clean_df["address"] = df["geocoded_hospital_address"]
+    clean_df["address"] = df["address"]
+    long, lat = format_geocode(df["geocoded_hospital_address"])
     clean_df["latitude"] = lat
     clean_df["longitude"] = long
 
