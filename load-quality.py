@@ -30,7 +30,7 @@ with conn.transaction():
                 load_hospital_info(conn, "hospital_info", data, collect_date)
         except Exception:
             failed_insertion.append(i)
-            print("Insertion failed at line " + str(i))
+            raise Exception("Insertion failed at line " + str(i))
         else:
             num_rows_inserted += 1
 

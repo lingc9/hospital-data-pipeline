@@ -146,7 +146,11 @@ def create_dict(conn, table):
     hopital_info table with remaining columns as dictionary values."""
 
     d = pd.read_sql_query("SELECT * FROM %s" % table, conn)
-    sql_dict = d.set_index("hosptial_id").to_dict('index')
+
+    if d.empty:
+        sql_dict = {}
+    else:
+        sql_dict = d.set_index("hospital_id").to_dict('index')
 
     return sql_dict
 
@@ -167,38 +171,38 @@ def create_dict(conn, table):
     #         d[key] = [value]
 
 
-def update_hospital_info(conn, table, data, collect_date):
+def update_hospital_info(conn, data, collect_date):
     cur = conn.cursor()
-    exist_id = check_hospital_id(conn, table, data)
-    to_update = data[data["hospital_id"].isin(exist_id)]
+    # exist_id = check_hospital_id(conn, table, data)
+    # print()
+    # to_update = data[data["hospital_id"]]
 
-    cur.execute("""
-        UPDATE hospital_info AS f
-        SET hospital_id = %(hospital_id)s,
-            name = %(name)s,
-            hospital_type = %(hospital_type)s,
-            ownership = %(ownership)s,
-            collection_date = %(collect_date)s,
-            state = %(state)s,
-            address = %(address)s,
-            city = %(city)s,
-            zip = %(zip)s,
-            emergency_service = %(emergency_service)s,
-            quality_rating = %(quality_rating)s
-        WHERE f.hospital_id = %(hospital_id)s
-        """,
-                {"hospital_id": to_update["hospital_id"],
-                 "name": to_update["name"],
-                 "hospital_type": to_update["hospital_type"],
-                 "ownership": to_update["ownership"],
-                 "collection_date": collect_date,
-                 "state": to_update["state"],
-                 "address": to_update["address"],
-                 "city": to_update["city"],
-                 "zip": to_update["zip"],
-                 "emergency_service": to_update["emergency_service"],
-                 "quality_rating": to_update["quality_rating"],
-                 })
+    cur.execute(
+        "UPDATE hospital_info AS f"
+        " SET hospital_id = %(hospital_id)s,"
+        "name = %(name)s,"
+        "hospital_type = %(hospital_type)s,"
+        "ownership = %(ownership)s,"
+        "collection_date = %(collect_date)s,"
+        "state = %(state)s,"
+        "address = %(address)s,"
+        "city = %(city)s,"
+        "zip = %(zip)s,"
+        "emergency_service = %(emergency_service)s,"
+        "quality_rating = %(quality_rating)s"
+        "WHERE f.hospital_id = %(hospital_id)s",
+        {"hospital_id": data["hospital_id"],
+         "name": data["name"],
+         "hospital_type": data["hospital_type"],
+         "ownership": data["ownership"],
+         "collect_date": collect_date,
+         "state": data["state"],
+         "address": data["address"],
+         "city": data["city"],
+         "zip": data["zip"],
+         "emergency_service": data["emergency_service"],
+         "quality_rating": data["quality_rating"],
+         })
 
 
 def update_hospital_location(conn, data):
@@ -210,8 +214,9 @@ def check_hospital_id(conn, table, data):
     an array of the pre-existing hospital ids."""
     sql_dict = create_dict(conn, table)
 
-    ids = data["hospital_id"].unique()
-    exists = np.intersect1d(ids, sql_dict.keys())
+    ids = np.array([data["hospital_id"]])
+    key_array = np.array(list(sql_dict.keys()))
+    exists = np.intersect1d(ids, key_array)
 
     return exists
 
@@ -228,18 +233,15 @@ def load_hospital_info(conn, table, data, collect_date):
         data: a pd dataframe of information we have read out of the .csv file
         collect_date: the collection date"""
     print("before if")
-    if check_table_exists(conn, table):
-        existing_hosp = check_hospital_id(conn, table, data)
-        print("why check")
-    else:
-        insert_hospital_info(conn, data, collect_date)
+    if check_table_exists(conn, table) is False:
+        raise ValueError("Table %s does not exist" % table)
 
-    if existing_hosp:  # When array of existing hospital is not empty, update
-        print("found existing hospital")
-        update_hospital_info(conn, table, data, collect_date)
-    else:  # Otherwise, insert
-        print("adding existing hospital")
+    existing_hosp = check_hospital_id(conn, table, data)
+
+    if len(existing_hosp) == 0:
         insert_hospital_info(conn, data, collect_date)
+    else:  # When array of existing hospital is not empty, update
+        update_hospital_info(conn, data, collect_date)
 
     return True
 
