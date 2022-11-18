@@ -99,14 +99,14 @@ def clean_hhs_data(file_path):
     clean_df["avalible_pediatric_beds"] = df[
         "all_pediatric_inpatient_beds_7_day_avg"]
     clean_df["occupied_adult_beds"] = df[
-        "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"]
+        "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"].astype("float")
     clean_df["occupied_pediatric_beds"] = df[
         "all_pediatric_inpatient_bed_occupied_7_day_avg"]
     clean_df["available_ICU_beds"] = df["total_icu_beds_7_day_avg"]
     clean_df["occupied_ICU_beds"] = df["icu_beds_used_7_day_avg"]
     clean_df["COVID_beds_use"] = df["inpatient_beds_used_covid_7_day_avg"]
     clean_df["COVID_ICU_use"] = df[
-        "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"]
+        "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"].astype("float")
     clean_df["fips"] = df["fips_code"]
     clean_df["address"] = df["address"]
     gcode = df.geocoded_hospital_address
