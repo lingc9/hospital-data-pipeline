@@ -35,7 +35,6 @@ data - a row of pd data frame containing the data to be inserted
 collect_date - the date when the quality file is collected
 """
 
-from sqlalchemy import create_engine
 import psycopg
 import pandas as pd
 import numpy as np
