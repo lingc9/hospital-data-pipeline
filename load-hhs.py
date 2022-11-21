@@ -13,7 +13,7 @@ nfile = "./data/hhs_weekly/" + str(sys.argv[1])
 insert_data = clean_hhs_data(nfile)
 
 # Subset data to insert (Testing Purposes)
-insert_data = insert_data.iloc[0:10, ]
+insert_data = insert_data.iloc[0:100, ]
 # print(insert_data)
 
 print("Detect " + str(len(insert_data)) + " rows of data")

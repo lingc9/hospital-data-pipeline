@@ -17,7 +17,7 @@ collect_date = str(sys.argv[1])
 collect_date = datetime.datetime.strptime(collect_date, "%Y-%m-%d")
 
 # Subset data to insert (Testing Purposes)
-# insert_data = insert_data.iloc[0:50, ]
+insert_data = insert_data.iloc[0:100, ]
 # print(insert_data)
 
 print("Detect " + str(len(insert_data)) + " rows of data")
