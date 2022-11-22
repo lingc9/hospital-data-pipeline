@@ -39,7 +39,6 @@ def clean_quality_data(file_path):
     clean_df["zip"] = df["ZIP Code"].astype("str")
     clean_df["emergency_service"] = df["Emergency Services"]
     clean_df["quality_rating"] = df["Hospital overall rating"]
-    # Need to clean and add the ratings later
     return clean_df
 
 
