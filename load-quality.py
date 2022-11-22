@@ -4,6 +4,7 @@ import sys
 import time
 import datetime
 import warnings
+from tqdm import tqdm
 import pandas as pd
 from cleandata import clean_quality_data
 from loaddata import connect_to_sql, load_hospital_info, count_hospitals
@@ -36,7 +37,7 @@ start = time.time()
 
 with conn.transaction():
     print("Connection established, begin inserting the data...")
-    for i in range(insert_data.shape[0]):
+    for i in tqdm(range(insert_data.shape[0])):
         data = insert_data.loc[int(i), ]
         try:
             with conn.transaction():
