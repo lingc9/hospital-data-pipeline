@@ -97,7 +97,8 @@ def load_hospital_data(cur, data):
                     "%(avalible_adult_beds)s, %(avalible_pediatric_beds)s, "
                     "%(occupied_adult_beds)s, %(occupied_pediatric_beds)s, "
                     "%(available_ICU_beds)s, %(occupied_ICU_beds)s, "
-                    "%(COVID_beds_use)s, %(COVID_ICU_use)s) ",
+                    "%(COVID_beds_use)s, %(COVID_ICU_use)s) "
+                    "ON CONFLICT DO NOTHING",
                     {
                      "hospital_id": data["hospital_id"],
                      "collection_date": data["collection_date"],

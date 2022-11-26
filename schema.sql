@@ -43,12 +43,8 @@ CREATE TABLE hospital_data (
 	available_ICU_beds DECIMAL CHECK(available_ICU_beds >= 0),
 	occupied_ICU_beds DECIMAL CHECK(occupied_ICU_beds >= 0),
 	COVID_beds_use DECIMAL CHECK(COVID_beds_use >= 0),
-	COVID_ICU_use DECIMAL CHECK(COVID_ICU_use >= 0)
-	--CHECK(avalible_adult_beds >= occupied_adult_beds), 
-	--CHECK(avalible_pediatric_beds >= occupied_pediatric_beds), 
-	--CHECK(available_ICU_beds >= occupied_ICU_beds), 
-	--CHECK(available_ICU_beds >= COVID_ICU_use),
-	--CHECK(avalible_adult_beds + occupied_pediatric_beds >= COVID_beds_use)
+	COVID_ICU_use DECIMAL CHECK(COVID_ICU_use >= 0),
+	UNIQUE (hospital_id, collection_date)
 );
 
 CREATE TABLE hospital_info (
