@@ -4,9 +4,9 @@
 
 The reposity contains data folder, database tables creation file and other important python files about loading data, cleaning data and testing. Two data files sources from the US Department of Health and Human Services and the Centers for Medicare and Medicaid Services. Data folder include all data files we used, cleandata.py used to changing the data useless or missing, load-hhs.py is used to update HSS data, load-quality.py is used to update quality data, loaddata.py is used to insert the data in sql, and two testing python file are used to test the connection between python and sql and the geocode function.
 
-# Instruction
+# Instructions
 
-shema.sql:  
+schema.sql:  
 The first step to create three tables in a sql environment.
 
 cleandata.py:  

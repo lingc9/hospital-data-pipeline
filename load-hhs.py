@@ -1,4 +1,9 @@
-"""Driver file to load and clean weekly HHS data."""
+"""Driver file to load and clean weekly HHS data.
+
+Authors: Carol Ling     <caroll2@andrew.cmu.edu>
+#        Xiaochen Sun   <xsun3@andrew.cmu.edu>
+#        Xiaonuo Xu     <xiaonuox@andrew.cmu.edu>
+"""
 
 import sys
 import time

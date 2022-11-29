@@ -1,38 +1,8 @@
-"""
-Functions that connect to psql server and load the data
+"""Functions that connect to psql server and load the data
 
-
-connect_to_sql - creats a connection to postgresql
-
-load_hospital_data - insert a row of data into hospital_data
-
-load_hospital_info - insert or update a row of data into hospital_info
-
-load_hospital_location - insert or update a row of data into hospital_location
-
-update_hospital_info - update a hospital's inforamtion in hospital_info
-
-update_hospital_location - update a hospital's location in hospital_location
-
-insert_hospital_info - insert a new hospital to hospital_info
-
-insert_hospital_location - insert a new hospital to hospital_location
-
-check_hospital_info - check if a hospital exist in hospital_info
-
-check_hospital_location - check if a hospital exist in hospital_location
-
-Arguments:
-
-dict_info - dictionary containing all hospital id from hospital_info
-
-dict_location - dictionary containing all hospital id from hospital_location
-
-conn - psycopg connect to postgresql server
-
-data - a row of pd data frame containing the data to be inserted
-
-collect_date - the date when the quality file is collected
+Authors: Carol Ling     <caroll2@andrew.cmu.edu>
+#        Xiaochen Sun   <xsun3@andrew.cmu.edu>
+#        Xiaonuo Xu     <xiaonuox@andrew.cmu.edu>
 """
 
 import psycopg
@@ -40,6 +10,15 @@ import credentials as cred
 
 
 def connect_to_sql():
+    """Creates the connection to PostgreSQL. Prerequisite to this functioning
+    properly is the creation of a credentials.py file with the variables
+    DB_USER and DB_PASSWORD defined.
+
+    Arguments:
+        None.
+    Returns:
+        conn (connection object): a Pyscopg connection object.
+    """
     conn = psycopg.connect(
         host="sculptor.stat.cmu.edu", dbname=cred.DB_USER,
         user=cred.DB_USER, password=cred.DB_PASSWORD
@@ -48,6 +27,17 @@ def connect_to_sql():
 
 
 def load_hospital_info(cur, data, collect_date):
+    """Inserts a row of data into the hospital_info SQL table.
+
+    Arguments:
+        cur (cursor object): a Psycopg cursor object.
+        data (pd.Dataframe): one row of cleaned data to insert.
+        collect_date (str): collection date as a string in the format of
+        YYYY-MM-DD.
+
+    Returns:
+        Boolean value of True.
+    """
     try:
         cur.execute("INSERT INTO hospital_info (hospital_id, name, "
                     "hospital_type, ownership, collection_date, state, "
@@ -87,6 +77,15 @@ def load_hospital_info(cur, data, collect_date):
 
 
 def load_hospital_data(cur, data):
+    """Inserts or update a row of data into the hospital_data SQL table.
+
+    Arguments:
+        cur (cursor object): a Psycopg cursor object.
+        data (pd.Dataframe): one row of cleaned data to insert/update.
+
+    Returns:
+        Boolean value of True.
+    """
     try:
         cur.execute("INSERT INTO hospital_data (hospital_id, collection_date, "
                     "avalible_adult_beds, avalible_pediatric_beds, "
@@ -120,6 +119,15 @@ def load_hospital_data(cur, data):
 
 
 def load_hospital_location(cur, data):
+    """Inserts or update a row of data into the hospital_location SQL table.
+
+    Arguments:
+        cur (cursor object): a Psycopg cursor object.
+        data (pd.Dataframe): one row of cleaned data to insert/update.
+
+    Returns:
+        Boolean value of True.
+    """
     try:
         cur.execute("INSERT INTO hospital_location (hospital_id, "
                     "collection_date, fips, latitude, longitude)"
@@ -145,11 +153,11 @@ def load_hospital_location(cur, data):
 
 def count_hospitals(cur, tablename):
     """
-    Counts number of hospitals in relations where each hospital_id is unique
+    Counts number of hospitals in relations where each hospital_id is unique.
 
-    Argument:
-    cur - connection object from the server
-    tablename - name of the relation to do query using
+    Arguments:
+        cur (cursor object): a Psycopg cursor object.
+        tablename (str): name of the SQL table for the query to target.
     """
 
     if tablename == "hospital_info":

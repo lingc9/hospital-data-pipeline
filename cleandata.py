@@ -1,10 +1,9 @@
-"""
+"""Functions to import and clean the raw csv data from a relative or absolute
+file path.
+
 Authors: Carol Ling     <caroll2@andrew.cmu.edu>
 #        Xiaochen Sun   <xsun3@andrew.cmu.edu>
 #        Xiaonuo Xu     <xiaonuox@andrew.cmu.edu>
-
-Functions to import and clean the raw csv data from a relative or absolute file
-path.
 """
 
 import pandas as pd
