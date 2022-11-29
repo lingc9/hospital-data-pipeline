@@ -1,28 +1,26 @@
 """
-Functions to import and clean csv data
+Authors: Carol Ling     <caroll2@andrew.cmu.edu>
+#        Xiaochen Sun   <xsun3@andrew.cmu.edu>
+#        Xiaonuo Xu     <xiaonuox@andrew.cmu.edu>
 
-format_geocode - turns geocoded hospital address into longitude and latitude
-
-Arguments:
-code - geocoded address stored as string
-
-
-clean_quality_data - converts and cleans hospital general information data
-
-Argumemts:
-file_path - directory to where the csv file is stored, in string
-
-
-clean_hhs_data - converts and cleans hospital general information data
-
-Argumemts:
-file_path - directory to where the csv file is stored, in string
+Functions to import and clean the raw csv data from a relative or absolute file
+path.
 """
 
 import pandas as pd
 
 
 def clean_quality_data(file_path):
+    """Converts and cleans hospital data from Centers for Medicare and Medicaid
+    Services (CMS).
+
+    Arguments:
+        file_path (str): file path to the directory to where the raw csv is
+        stored.
+
+    Returns:
+        clean_df (pd.Dataframe): a clean pd.Dataframe object.
+    """
     df = pd.read_csv(file_path)
     clean_df = pd.DataFrame()
 
@@ -43,6 +41,17 @@ def clean_quality_data(file_path):
 
 
 def clean_hhs_data(file_path):
+    """
+    Converts and cleans general hospital data from the US Department of Health
+    and Human Services (HHS).
+
+    Arguments:
+        file_path (str): file path to the directory to where the raw csv is
+        stored.
+
+    Returns:
+        clean_df (pd.Dataframe): a clean pd.Dataframe object.
+    """
     df = pd.read_csv(file_path)
     clean_df = pd.DataFrame()
 
