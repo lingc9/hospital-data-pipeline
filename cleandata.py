@@ -56,44 +56,33 @@ def clean_hhs_data(file_path):
 
     df = df.replace("NA", None)
     df = df.replace("NULL", None)
-    missing_value = df["all_adult_hospital_beds_7_day_avg"] == -999999
-    df["all_adult_hospital_beds_7_day_avg"][missing_value] = None
+    df.loc[df.loc[:, "all_adult_hospital_beds_7_day_avg" ] < 0,
+           "all_adult_hospital_beds_7_day_avg"] = None
+    
+    df.loc[df.loc[:, "all_pediatric_inpatient_beds_7_day_avg" ] < 0,
+           "all_pediatric_inpatient_beds_7_day_avg"] = None
+    
+    df.loc[df.loc[:, "all_adult_hospital_inpatient_bed_occupied_7_day_coverage" ] < 0,
+           "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] = None
 
-    missing_value = df["all_pediatric_inpatient_beds_7_day_avg"] == -999999
-    df["all_pediatric_inpatient_beds_7_day_avg"][missing_value] = None
+    df.loc[df.loc[:, "total_icu_beds_7_day_avg" ] < 0,
+           "total_icu_beds_7_day_avg"] = None
+    
+    df.loc[df.loc[:, "icu_beds_used_7_day_avg" ] < 0,
+           "icu_beds_used_7_day_avg"] = None
 
-    missing_value =\
-        df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"
-           ] == -999999
-    df["all_adult_hospital_inpatient_bed_occupied_7_day_coverage"
-       ][missing_value] = None
-
-    missing_value = df["total_icu_beds_7_day_avg"] == -999999
-    df["total_icu_beds_7_day_avg"][missing_value] = None
-
-    missing_value = df["icu_beds_used_7_day_avg"] == -999999
-    df["icu_beds_used_7_day_avg"][missing_value] = None
-
-    missing_value = df["inpatient_beds_used_covid_7_day_avg"] == -999999
-    df["inpatient_beds_used_covid_7_day_avg"][missing_value] = None
-
-    missing_value =\
-        df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"
-           ] == -999999
-
-    df["staffed_icu_adult_patients_confirmed_covid_7_day_coverage"
-       ][missing_value] = None
-
-    missing_value =\
-        df["all_pediatric_inpatient_bed_occupied_7_day_avg"] == -999999
-    df["all_pediatric_inpatient_bed_occupied_7_day_avg"][missing_value] = None
-
-    # Clean the data here (remove NA. -999, etc.)
+    df.loc[df.loc[:, "inpatient_beds_used_covid_7_day_avg" ] < 0,
+           "inpatient_beds_used_covid_7_day_avg"] = None
+    
+    df.loc[df.loc[:, "staffed_icu_adult_patients_confirmed_covid_7_day_coverage" ] < 0,
+           "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] = None
+    
+    df.loc[df.loc[:, "all_pediatric_inpatient_bed_occupied_7_day_avg" ] < 0,
+           "all_pediatric_inpatient_bed_occupied_7_day_avg"] = None
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
 
-    clean_df["collection_date"] = pd.to_datetime(df["collection_week"],
-                                                 format="%Y-%m-%d")
+    clean_df["collection_date"] = df["collection_week"].apply(pd.to_datetime)
 
     clean_df["avalible_adult_beds"] = df["all_adult_hospital_beds_7_day_avg"
                                          ].astype("float")
