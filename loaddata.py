@@ -152,8 +152,7 @@ def load_hospital_location(cur, data):
 
 
 def count_hospitals(cur, tablename):
-    """
-    Counts number of hospitals in relations where each hospital_id is unique.
+    """Counts number of hospitals in relations where each hospital_id is unique.
 
     Arguments:
         cur (cursor object): a Psycopg cursor object.

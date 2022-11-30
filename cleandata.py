@@ -40,9 +40,8 @@ def clean_quality_data(file_path):
 
 
 def clean_hhs_data(file_path):
-    """
-    Converts and cleans general hospital data from the US Department of Health
-    and Human Services (HHS).
+    """Converts and cleans general hospital data from the US Department of
+    Health and Human Services (HHS).
 
     Arguments:
         file_path (str): file path to the directory to where the raw csv is
@@ -56,28 +55,30 @@ def clean_hhs_data(file_path):
 
     df = df.replace("NA", None)
     df = df.replace("NULL", None)
-    df.loc[df.loc[:, "all_adult_hospital_beds_7_day_avg" ] < 0,
+    df.loc[df.loc[:, "all_adult_hospital_beds_7_day_avg"] < 0,
            "all_adult_hospital_beds_7_day_avg"] = None
-    
-    df.loc[df.loc[:, "all_pediatric_inpatient_beds_7_day_avg" ] < 0,
+
+    df.loc[df.loc[:, "all_pediatric_inpatient_beds_7_day_avg"] < 0,
            "all_pediatric_inpatient_beds_7_day_avg"] = None
-    
-    df.loc[df.loc[:, "all_adult_hospital_inpatient_bed_occupied_7_day_coverage" ] < 0,
+
+    df.loc[df.loc[:,
+                  "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0,
            "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] = None
 
-    df.loc[df.loc[:, "total_icu_beds_7_day_avg" ] < 0,
+    df.loc[df.loc[:, "total_icu_beds_7_day_avg"] < 0,
            "total_icu_beds_7_day_avg"] = None
-    
-    df.loc[df.loc[:, "icu_beds_used_7_day_avg" ] < 0,
+
+    df.loc[df.loc[:, "icu_beds_used_7_day_avg"] < 0,
            "icu_beds_used_7_day_avg"] = None
 
-    df.loc[df.loc[:, "inpatient_beds_used_covid_7_day_avg" ] < 0,
+    df.loc[df.loc[:, "inpatient_beds_used_covid_7_day_avg"] < 0,
            "inpatient_beds_used_covid_7_day_avg"] = None
-    
-    df.loc[df.loc[:, "staffed_icu_adult_patients_confirmed_covid_7_day_coverage" ] < 0,
+
+    df.loc[df.loc[:,
+                  "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0,
            "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] = None
-    
-    df.loc[df.loc[:, "all_pediatric_inpatient_bed_occupied_7_day_avg" ] < 0,
+
+    df.loc[df.loc[:, "all_pediatric_inpatient_bed_occupied_7_day_avg"] < 0,
            "all_pediatric_inpatient_bed_occupied_7_day_avg"] = None
 
     clean_df["hospital_id"] = df["hospital_pk"].astype("str")
