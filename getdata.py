@@ -46,7 +46,7 @@ def get_distinct_collection_date(cur, tablename):
                             "ORDER BY collection_date ASC")
                     .format(sql.Identifier(tablename)))
     except psycopg2.errors.UndefinedTable:
-        raise Exception("Relation doesn not exist in the server.")
+        raise Exception("Relation does not exist in the server.")
     lists = [item for sublist in cur.fetchall() for item in sublist]
     return lists
 
@@ -78,11 +78,11 @@ def get_previous_weeks(cur, tablename, collect_date):
             return False
 
 
-def get_records_number(cur, tablename, collect_date):
+def get_records_number(conn, tablename, collect_date):
     """Number of records loaded in the most recent and previous weeks
 
     Arguments:
-        cur (cursor object): a Psycopg cursor object.
+        conn (connection object): a Psycopg connection object.
         tablename (string): name of any of the three relations:
                             hospital_info, hospital_data, hospital_location
         collect_date (datetime.date): collection date of interest
@@ -92,6 +92,7 @@ def get_records_number(cur, tablename, collect_date):
         If the collection date is not in the table, return False
     """
 
+    cur = conn.cursor()
     lists = get_previous_weeks(cur, tablename, collect_date)
     record_number = []
 
@@ -103,20 +104,20 @@ def get_records_number(cur, tablename, collect_date):
                             .format(sql.Identifier(tablename)),
                             (lists[i],))
             except psycopg2.errors.UndefinedTable:
-                raise Exception("Relation doesn not exist in the server.")
+                raise Exception("Relation does not exist in the server.")
             record_number.append(cur.fetchone()[0])
             print(str(tablename) + " contains "
                   + str(record_number[i]) + " records from "
                   + str(lists[i]))
+        cur.close()
         return dict(zip(lists, record_number))
     else:
         return False
 
 
-def get_beds_detail(conn, collect_date):
+def get_beds_detail(conn, collect_date, recent):
     """Get the number of adult and pediatric beds available this week,
-       the number used, and the number used by patients with COVID,
-       compared to the 4 most recent weeks
+       the number used, and the number used by patients with COVID
 
     Arguments:
         conn (connection object): a Psycopg connection object.
@@ -130,27 +131,101 @@ def get_beds_detail(conn, collect_date):
     cur = conn.cursor()
     lists = get_previous_weeks(cur, "hospital_data", collect_date)
     colnames = ["avalible_adult_beds", "avalible_pediatric_beds",
-                "occupied_adult_beds", "occupied_pediatric_beds",
-                "available_icu_beds", "occupied_icu_beds", "covid_beds_use"]
+                "available_icu_beds", "occupied_adult_beds",
+                "occupied_pediatric_beds", "occupied_icu_beds",
+                "covid_beds_use", "covid_icu_use"]
     cur.close()
 
     if lists:
-        # Only take the 4 most recent weeks and the current one
-        if len(lists) > 5:
-            lists = lists[-5:]
-        for i in range(len(lists)):
-            try:
-                query = sql.SQL("SELECT SUM(NULLIF({}, 'NaN')), "
-                                "collection_date FROM {} "
-                                "GROUP BY collection_date") \
-                        .format(sql.SQL(", 'NaN')), SUM(NULLIF(")
-                                .join(map(sql.Identifier, colnames)),
-                                sql.Identifier("hospital_data"))
-                df = pd.read_sql_query(query, conn)
-            except psycopg2.errors.UndefinedTable:
-                raise Exception("Relation doesn not exist in the server.")
+        try:
+            query = sql.SQL("SELECT SUM(NULLIF({}, 'NaN')), "
+                            "collection_date FROM {} "
+                            "GROUP BY collection_date "
+                            "ORDER BY collection_date DESC") \
+                    .format(sql.SQL(", 'NaN')), SUM(NULLIF(")
+                            .join(map(sql.Identifier, colnames)),
+                            sql.Identifier("hospital_data"))
+            df = pd.read_sql_query(query, conn)
+        except psycopg2.errors.UndefinedTable:
+            raise Exception("Relation does not exist in the server.")
+
+        # Subset the 4 most recent weeks if recent restriction is in place
+        if len(lists) > 5 and recent:
+            index = df.index[df['collection_date'] == collect_date].tolist()
+            df = df.iloc[index[0]:index[0]+4]
+
+        # Change name of the data frame
         colnames.append("collection_date")
         df.set_axis(colnames, axis=1, inplace=True)
+        df.iloc[:, :-1] = df.iloc[:, :-1].astype(int)
+
+        # Calculate non_covid bed use
+        df["non_covid_beds_use"] = \
+            df["occupied_adult_beds"] + df["occupied_pediatric_beds"]
+
+        return df
+    else:
+        return False
+
+
+def get_beds_sum_by(conn, collect_date, property):
+    """Get the number of beds in use by specified property in given week
+
+    Arguments:
+        conn (connection object): a Psycopg connection object.
+        collect_date (datetime.date): collection date of interest
+        property (string): any variable in hospital_info relation
+                           quality_rating / state / ownership
+
+    Returns:
+        A table containing sum and utlization rate of beds grouped by property
+        If no data on that collection_date exists, return False
+    """
+
+    cur = conn.cursor()
+    lists_data = get_previous_weeks(cur, "hospital_data", collect_date)
+    lists_info = get_distinct_collection_date(cur, "hospital_info")
+    colnames = ["avalible_adult_beds", "avalible_pediatric_beds",
+                "available_icu_beds", "occupied_adult_beds",
+                "occupied_pediatric_beds", "occupied_icu_beds",
+                "covid_beds_use"]
+    cur.close()
+
+    if lists_data and lists_info:
+        try:
+            query = sql.SQL("SELECT SUM(NULLIF({}, 'NaN')), {prop} "
+                            "FROM (SELECT hospital_id, {} FROM hospital_data "
+                            "WHERE collection_date = CAST('{}' AS DATE)) AS d "
+                            "INNER JOIN (SELECT hospital_id, {prop} "
+                            "FROM hospital_info) AS i ON "
+                            "d.hospital_id = i.hospital_id "
+                            "GROUP BY {prop}") \
+                    .format(sql.SQL(", 'NaN')), SUM(NULLIF(")
+                            .join(map(sql.Identifier, colnames)),
+                            sql.SQL(', ')
+                            .join(map(sql.Identifier, colnames)),
+                            sql.SQL(str(collect_date)),
+                            prop=sql.SQL(property))
+            df = pd.read_sql_query(query, conn)
+        except psycopg2.errors.UndefinedTable:
+            raise Exception("Relation does not exist in the server.")
+
+        # Change name of the data frame
+        colnames.append(property)
+        df.set_axis(colnames, axis=1, inplace=True)
+        df.iloc[:, :-1] = df.iloc[:, :-1].astype(int)
+
+        # Calculate utilization rate
+        df["adult_utilization"] = \
+            (df["occupied_adult_beds"]/df["avalible_adult_beds"])\
+            .round(decimals=2)
+        df["pediatric_utilization"] = \
+            (df["occupied_pediatric_beds"]/df["avalible_pediatric_beds"])\
+            .round(decimals=2)
+        df["icu_utilization"] = \
+            (df["occupied_icu_beds"]/df["available_icu_beds"])\
+            .round(decimals=2)
+
         return df
     else:
         return False
