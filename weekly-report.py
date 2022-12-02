@@ -11,7 +11,8 @@ import datetime
 import warnings
 import pandas as pd
 from getdata import connect_to_sql2
-from getdata import get_records_number, get_beds_detail, get_beds_sum_by
+from getdata import get_records_number, get_beds_detail, get_beds_sum_by, \
+                    get_covid_change
 
 # Ignore the warning message from the code
 warnings.filterwarnings("ignore")
@@ -27,7 +28,7 @@ conn = connect_to_sql2()
 cur = conn.cursor()
 print("Generating report for " + str(collect_date) + ":")
 
-# The following code has been tested
+# Begin generating analysis
 
 print("\n 1. Hospital records loaded in the recent weeks \n")
 record_number = get_records_number(conn, "hospital_data", collect_date)
@@ -70,6 +71,23 @@ if bed_by_ownership is False:
     print("Server lacks HHS and CMS data on " + str(collect_date))
 else:
     print(bed_by_ownership)
+
+print("\n 6. Rank states by change in covid case since last week \n")
+state_rank = get_covid_change(conn, collect_date, 10, "quality_rating")
+
+if state_rank is False:
+    print("Server lacks HHS and CMS data on " + str(collect_date))
+else:
+    print(state_rank)
+
+print("\n 7. Rank hospital by change in covid case since last week \n")
+
+hospital_rank = get_covid_change(conn, collect_date, 10, "hospital_id")
+
+if hospital_rank is False:
+    print("Server lacks HHS and CMS data on " + str(collect_date))
+else:
+    print(hospital_rank)
 
 # Close the connection to psql server
 cur.close()

@@ -229,3 +229,101 @@ def get_beds_sum_by(conn, collect_date, property):
         return df
     else:
         return False
+
+
+def get_hospital(conn, collect_date):
+    """Get the number of covid beds in use by hospital_id
+
+    Arguments:
+        conn (connection object): a Psycopg connection object.
+        collect_date (datetime.date): collection date of interest
+
+    Returns:
+        A table containing sum of covid beds in use grouped by hospital_id
+        If no data on that collection_date exists, return False
+    """
+
+    colnames = ["name", "city", "state", "zip", "address"]
+
+    try:
+        query = sql.SQL("SELECT i.hospital_id, covid_case, {} FROM (SELECT "
+                        "hospital_id, SUM(NULLIF(COVID_beds_use, 'NaN')) AS "
+                        "covid_case FROM hospital_data WHERE collection_date "
+                        "= CAST('{}' AS DATE) GROUP BY hospital_id) AS d "
+                        "INNER JOIN (SELECT hospital_id, {} FROM hospital_info"
+                        ") AS i ON d.hospital_id = i.hospital_id") \
+                .format(sql.SQL(", ")
+                        .join(map(sql.Identifier, colnames)),
+                        sql.SQL(str(collect_date)),
+                        sql.SQL(", ")
+                        .join(map(sql.Identifier, colnames)))
+        df = pd.read_sql_query(query, conn)
+    except psycopg2.errors.UndefinedTable:
+        raise Exception("Relation does not exist in the server.")
+    return df
+
+
+def get_covid_change(conn, collect_date, nshow, property):
+    """Rank the states/hospitals by the number of cases since the last week
+
+    Arguments:
+        conn (connection object): a Psycopg connection object.
+        collect_date (datetime.date): collection date of interest
+        nshow (int): number of observations to display
+
+    Returns:
+        A table containing change in covid case and current case, sorted
+        If no data on that collection_date exists, return False
+    """
+
+    cur = conn.cursor()
+    lists = get_previous_weeks(cur, "hospital_data", collect_date)
+    cur.close()
+
+    if lists:
+        if len(lists) > 1 and property == "quality_rating":
+            index = lists.index(collect_date)
+            lastweek = lists[index-1]
+            new_data = get_beds_sum_by(conn, collect_date,
+                                       property).iloc[:, 6:8]
+            old_data = get_beds_sum_by(conn, lastweek,
+                                       property).iloc[:, 6:8]
+            new_data.columns = ["covid_"+str(collect_date), property]
+            old_data.columns = ["covid_"+str(lastweek), property]
+
+            # Calculate the change in covid since last week
+            change_data = new_data.join(old_data.set_index(property),
+                                        on=property)
+            change_data = change_data.dropna()
+            change_data["change_covid_bed_use"] = \
+                change_data.iloc[:, 0] - change_data.iloc[:, 2]
+
+            # Sort by the change
+            change_data = change_data.iloc[(
+                -change_data["change_covid_bed_use"].abs()).argsort()]
+            change_data = change_data.iloc[:nshow]
+            return change_data
+
+        elif len(lists) > 1 and property == "hospital_id":
+            index = lists.index(collect_date)
+            lastweek = lists[index-1]
+            new_data = get_hospital(conn, collect_date)
+            old_data = get_hospital(conn, lastweek).iloc[:, 0:2]
+            old_data.columns = [property, "covid_"+str(lastweek)]
+
+            # Calculate the change in covid since last week
+            change_data = new_data.join(old_data.set_index(property),
+                                        on=property)
+            change_data = change_data.dropna()
+            change_data["change_covid_bed_use"] = \
+                change_data.iloc[:, 1] - change_data.iloc[:, 7]
+
+            # Sort by the change
+            change_data = change_data.iloc[(
+                -change_data["change_covid_bed_use"].abs()).argsort()]
+            change_data = change_data.iloc[:nshow]
+            return change_data
+        else:
+            return False
+    else:
+        return False
