@@ -1,4 +1,5 @@
-"""Functions that connect to psql server and load the data
+"""
+Functions that connect to psql server and load the data
 
 Authors: Carol Ling     <caroll2@andrew.cmu.edu>
 #        Xiaochen Sun   <xsun3@andrew.cmu.edu>

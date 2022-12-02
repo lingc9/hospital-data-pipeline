@@ -1,4 +1,5 @@
-"""Functions to import and clean the raw csv data from a relative or absolute
+"""
+Functions to import and clean the raw csv data from a relative or absolute
 file path.
 
 Authors: Carol Ling     <caroll2@andrew.cmu.edu>
@@ -62,7 +63,7 @@ def clean_hhs_data(file_path):
            "all_pediatric_inpatient_beds_7_day_avg"] = None
 
     df.loc[df.loc[:,
-                  "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0,
+           "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] < 0,
            "all_adult_hospital_inpatient_bed_occupied_7_day_coverage"] = None
 
     df.loc[df.loc[:, "total_icu_beds_7_day_avg"] < 0,
@@ -75,7 +76,7 @@ def clean_hhs_data(file_path):
            "inpatient_beds_used_covid_7_day_avg"] = None
 
     df.loc[df.loc[:,
-                  "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0,
+           "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] < 0,
            "staffed_icu_adult_patients_confirmed_covid_7_day_coverage"] = None
 
     df.loc[df.loc[:, "all_pediatric_inpatient_bed_occupied_7_day_avg"] < 0,

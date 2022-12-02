@@ -68,3 +68,9 @@ CREATE TABLE hospital_location (
 	latitude DECIMAL, 
 	longitude DECIMAL
 );
+
+
+SELECT SUM(NULLIF(avalible_adult_beds, 'NaN')), collection_date
+FROM hospital_data
+GROUP BY collection_date
+LIMIT 10;
