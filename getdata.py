@@ -213,7 +213,6 @@ def get_beds_sum_by(conn, collect_date, property):
         # Change name of the data frame
         colnames.append(property)
         df.set_axis(colnames, axis=1, inplace=True)
-        df.iloc[:, :-1] = df.iloc[:, :-1].astype(int)
 
         # Calculate utilization rate
         df["adult_utilization"] = \
@@ -281,7 +280,7 @@ def get_covid_change(conn, collect_date, nshow, property):
     cur.close()
 
     if lists:
-        if len(lists) > 1 and property == "quality_rating":
+        if len(lists) > 1 and property == "state":
             index = lists.index(collect_date)
             lastweek = lists[index-1]
             new_data = get_beds_sum_by(conn, collect_date,

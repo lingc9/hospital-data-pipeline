@@ -73,7 +73,7 @@ else:
     print(bed_by_ownership)
 
 print("\n 6. Rank states by change in covid case since last week \n")
-state_rank = get_covid_change(conn, collect_date, 10, "quality_rating")
+state_rank = get_covid_change(conn, collect_date, 10, "state")
 
 if state_rank is False:
     print("Server lacks HHS and CMS data on " + str(collect_date))
