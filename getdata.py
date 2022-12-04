@@ -106,9 +106,6 @@ def get_records_number(conn, tablename, collect_date):
             except psycopg2.errors.UndefinedTable:
                 raise Exception("Relation does not exist in the server.")
             record_number.append(cur.fetchone()[0])
-            print(str(tablename) + " contains "
-                  + str(record_number[i]) + " records from "
-                  + str(lists[i]))
         cur.close()
         return dict(zip(lists, record_number))
     else:

@@ -35,6 +35,10 @@ record_number = get_records_number(conn, "hospital_data", collect_date)
 
 if not record_number:
     print("Server lacks HHS data on " + str(collect_date))
+else:
+    for key, value in record_number.items():
+        print("PostgreSQL server contains " + str(value) +
+              " HHS records from " + str(key))
 
 print("\n 2. Number of beds available and in use in recent weeks \n")
 bed_recent = get_beds_detail(conn, collect_date, True)
