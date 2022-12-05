@@ -242,10 +242,13 @@ def get_hospital(conn, collect_date):
     colnames = ["name", "city", "state", "zip", "address"]
 
     try:
-        query = sql.SQL("SELECT i.hospital_id, covid_case, {} FROM (SELECT "
-                        "hospital_id, SUM(NULLIF(COVID_beds_use, 'NaN')) AS "
-                        "covid_case FROM hospital_data WHERE collection_date "
-                        "= CAST('{}' AS DATE) GROUP BY hospital_id) AS d "
+        query = sql.SQL("SELECT i.hospital_id, covid_bed_case, covid_icu_case,"
+                        " {} FROM (SELECT hospital_id, "
+                        "SUM(NULLIF(COVID_beds_use, 'NaN')) AS covid_bed_case,"
+                        " SUM(NULLIF(COVID_ICU_use, 'Nan')) AS "
+                        "covid_icu_case FROM hospital_data WHERE "
+                        "collection_date = CAST('{}' AS DATE) "
+                        "GROUP BY hospital_id) AS d "
                         "INNER JOIN (SELECT hospital_id, {} FROM hospital_info"
                         ") AS i ON d.hospital_id = i.hospital_id") \
                 .format(sql.SQL(", ")
@@ -257,6 +260,10 @@ def get_hospital(conn, collect_date):
     except psycopg2.errors.UndefinedTable:
         raise Exception("Relation does not exist in the server.")
     return df
+
+
+def get_covid_total():
+    pass
 
 
 def get_covid_change(conn, collect_date, nshow, property):
@@ -281,9 +288,18 @@ def get_covid_change(conn, collect_date, nshow, property):
             index = lists.index(collect_date)
             lastweek = lists[index-1]
             new_data = get_beds_sum_by(conn, collect_date,
-                                       property).iloc[:, 6:8]
+                                       property).iloc[:, 5:8]
+            new_data["covid_cases"] = new_data.iloc[:, 0] + new_data.iloc[:, 1]
+            new_data["covid_cases"] = \
+                new_data["covid_cases"].round(0).astype('Int64')
+            new_data = new_data[["covid_cases", "state"]]
             old_data = get_beds_sum_by(conn, lastweek,
-                                       property).iloc[:, 6:8]
+                                       property).iloc[:, 5:8]
+            old_data["covid_cases"] = old_data.iloc[:, 0] + old_data.iloc[:, 1]
+            old_data["covid_cases"] = \
+                old_data["covid_cases"].round(0).astype('Int64')
+            old_data = old_data[["covid_cases", "state"]]
+
             new_data.columns = ["covid_"+str(collect_date), property]
             old_data.columns = ["covid_"+str(lastweek), property]
 
@@ -298,13 +314,23 @@ def get_covid_change(conn, collect_date, nshow, property):
             change_data = change_data.iloc[(
                 -change_data["change_covid_bed_use"].abs()).argsort()]
             change_data = change_data.iloc[:nshow]
-            return change_data
+            return change_data.reindex(sorted(change_data.columns), axis=1)
 
         elif len(lists) > 1 and property == "hospital_id":
             index = lists.index(collect_date)
             lastweek = lists[index-1]
             new_data = get_hospital(conn, collect_date)
-            old_data = get_hospital(conn, lastweek).iloc[:, 0:2]
+            new_data.insert(loc=1, column="covid_cases",
+                            value=new_data.iloc[:, 1] + new_data.iloc[:, 2])
+            new_data["covid_cases"] = \
+                new_data["covid_cases"].round(0).astype('Int64')
+            new_data = new_data.drop(new_data.iloc[:, 2:4], axis=1)
+            old_data = get_hospital(conn, lastweek).iloc[:, 0:3]
+            old_data.insert(loc=1, column="covid_cases",
+                            value=old_data.iloc[:, 1] + old_data.iloc[:, 2])
+            old_data["covid_cases"] = \
+                old_data["covid_cases"].round(0).astype('Int64')
+            old_data = old_data.drop(old_data.iloc[:, 2:4], axis=1)
             old_data.columns = [property, "covid_"+str(lastweek)]
 
             # Calculate the change in covid since last week
@@ -318,7 +344,7 @@ def get_covid_change(conn, collect_date, nshow, property):
             change_data = change_data.iloc[(
                 -change_data["change_covid_bed_use"].abs()).argsort()]
             change_data = change_data.iloc[:nshow]
-            return change_data
+            return change_data  # .reindex(sorted(change_data.columns), axis=1)
         else:
             return False
     else:
