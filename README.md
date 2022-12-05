@@ -16,16 +16,20 @@ clean_hhs_data - Converts and cleans general hospital data from the US Departmen
 load-hhs.py:  
 Driver file to load cleaned weekly HHS data into PostgreSQL when given a csv file from HHS.  
 Outputs a csv with lines that failed to insert.
+
 Run with the following command line prompt:
   python load-hhs.py file_name.csv
+
 Example call:
   python load-hhs.py 2022-01-04-hhs-data.csv
 
 load-quality.py:  
 Driver file to load cleaned Hospital General Information data into PostgreSQL when given a csv file from CMS.
 Outputs a csv with lines that failed to insert.
+
 Run with the following command line prompt:
   python load-quality.py YYYY-MM-DD file_name.csv
+
 Example call:
   python load-quality.py 2021-07-01 Hospital_General_Information-2021-07.csv
 
