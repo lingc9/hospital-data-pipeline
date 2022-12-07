@@ -16,7 +16,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from getdata import connect_to_sql2
 from getdata import get_records_number, get_beds_detail, get_beds_sum_by, \
-                    get_covid_change, get_distinct_collection_date
+                    get_covid_change, get_distinct_collection_date, \
+                    get_previous_weeks
 
 # Ignore the warning message from the code
 warnings.filterwarnings("ignore")
@@ -61,12 +62,12 @@ st.markdown("A table summarizing the number of adult and pediatric beds " +
             "patients with COVID, compared to the 4 most recent weeks.")
 
 bed_recent = get_beds_detail(conn, collect_date, True)
-bed_recent = bed_recent.iloc[:, [0, 1, 3, 4, 5, -2]]
-bed_recent = bed_recent.set_index('collection_date')
 
 if bed_recent is False:
     st.text("Server lacks HHS data on " + str(collect_date))
 else:
+    bed_recent = bed_recent.iloc[:, [0, 1, 3, 4, 5, -2]]
+    bed_recent = bed_recent.set_index('collection_date')
     st.dataframe(bed_recent)
 
 st.header("3. Hospital beds information by quality rating")
@@ -76,12 +77,12 @@ st.markdown("A table summarizing the number of beds in use by " +
             "and low-quality hospitals.")
 
 bed_by_quality = get_beds_sum_by(conn, collect_date, "quality_rating")
-bed_by_quality = bed_by_quality.iloc[:, 3:8]
-bed_by_quality = bed_by_quality.round(0).astype('Int64')
 
 if bed_by_quality is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
 else:
+    bed_by_quality = bed_by_quality.iloc[:, 3:8]
+    bed_by_quality = bed_by_quality.round(0).astype('Int64')
     st.dataframe(bed_by_quality)
 
 st.header("4. Hospital bed use by all cases and covid of all time")
@@ -91,12 +92,12 @@ st.markdown("A plot of the total number of hospital beds used " +
             "and COVID cases.")
 
 bed_all_time = get_beds_detail(conn, collect_date, False)
-bed_all_time = bed_all_time.iloc[:, 3:]
-bed_all_time = bed_all_time.set_index('collection_date')
 
 if bed_all_time is False:
     st.text("Server lacks HHS data on " + str(collect_date))
 else:
+    bed_all_time = bed_all_time.iloc[:, 3:]
+    bed_all_time = bed_all_time.set_index('collection_date')
     st.dataframe(bed_all_time)
     xtick = list(bed_all_time.index)
     xtick = sorted([date.strftime("%y-%m-%d") for date in xtick])
@@ -129,14 +130,15 @@ st.markdown("Graphs of hospital utilization (the percent of " +
             "available beds being used) by type of hospital " +
             "(private or public), over time.")
 
-listofdate = get_distinct_collection_date(cur, "hospital_data")
-for i in listofdate:
-    bed_by_ownership = get_beds_sum_by(conn, i, "ownership")
-    bed_by_ownership = bed_by_ownership.iloc[:, 7:] 
+listofdate = get_previous_weeks(cur, "hospital_data", collect_date)
 
-    if bed_by_ownership is False:
-        st.text("Server lacks HHS and CMS data on " + str(collect_date))
-    else:
+if listofdate is False:
+    st.text("Server lacks HHS and CMS data on " + str(collect_date))
+else:
+    list = get_distinct_collection_date(cur, "hospital_data")
+    for i in list:
+        bed_by_ownership = get_beds_sum_by(conn, i, "ownership")
+        bed_by_ownership = bed_by_ownership.iloc[:, 7:]
         labels = bed_by_ownership["ownership"]
         adult_util = bed_by_ownership["adult_utilization"]
         ped_util = bed_by_ownership["pediatric_utilization"]
@@ -154,9 +156,8 @@ for i in listofdate:
         ax.bar_label(rects1, padding=3)
         ax.bar_label(rects2, padding=3)
         ax.bar_label(rects3, padding=3)
-    
-        st.write(fig)
 
+        st.write(fig)
 
 
 st.header("6. Rank states by change in covid case since last week")
