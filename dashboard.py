@@ -98,7 +98,6 @@ if bed_all_time is False:
 else:
     bed_all_time = bed_all_time.iloc[:, 3:]
     bed_all_time = bed_all_time.set_index('collection_date')
-    st.dataframe(bed_all_time)
     xtick = list(bed_all_time.index)
     xtick = sorted([date.strftime("%y-%m-%d") for date in xtick])
     fig = plt.figure()
@@ -139,24 +138,27 @@ else:
     for i in list:
         bed_by_ownership = get_beds_sum_by(conn, i, "ownership")
         bed_by_ownership = bed_by_ownership.iloc[:, 7:]
+
         labels = bed_by_ownership["ownership"]
         adult_util = bed_by_ownership["adult_utilization"]
         ped_util = bed_by_ownership["pediatric_utilization"]
         icu_util = bed_by_ownership["icu_utilization"]
         x = np.arange(len(labels))
         width = 0.35
-        fig, ax = plt.subplots()
-        rects1 = ax.bar(x - width/2, adult_util, width, label='adult_utilization')
-        rects2 = ax.bar(x + width/2, ped_util, width, label='pediatric_utilization')
-        rects3 = ax.bar(x + width/2, icu_util, width, label='icu_utilization')
-        ax.set_ylabel('Proportion')
-        ax.set_title('Hospital utilization of different hospital ownership')
-        ax.set_xticks(x, labels)
-        ax.legend()
-        ax.bar_label(rects1, padding=3)
-        ax.bar_label(rects2, padding=3)
-        ax.bar_label(rects3, padding=3)
+        fig= plt.figure()
 
+        plt.bar(x-0.35, adult_util, width, color='cyan', \
+            label='adult_utilization')
+        plt.bar(x, ped_util, width, color='orange', \
+            label='pediatric_utilization' )
+        plt.bar(x+0.35, icu_util, width, color='green', \
+            label='icu_utilization')
+        plt.xticks(x, labels, rotation = 80)
+        
+        plt.ylabel('Proportion')
+        plt.title('Hospital utilization of different hospital ownership on ' + str(i))
+        plt.legend()
+        fig.tight_layout()
         st.write(fig)
 
 
