@@ -144,17 +144,16 @@ else:
         ped_util = bed_by_ownership["pediatric_utilization"]
         icu_util = bed_by_ownership["icu_utilization"]
         x = np.arange(len(labels))
-        width = 0.35
+        width = 0.2
         fig= plt.figure()
 
-        plt.bar(x-0.35, adult_util, width, color='cyan', \
+        plt.bar(x-0.2, adult_util, width, color='cyan', \
             label='adult_utilization')
         plt.bar(x, ped_util, width, color='orange', \
-            label='pediatric_utilization' )
-        plt.bar(x+0.35, icu_util, width, color='green', \
+            label='pediatric_utilization')
+        plt.bar(x+0.2, icu_util, width, color='green', \
             label='icu_utilization')
-        plt.xticks(x, labels, rotation = 80)
-        
+        plt.xticks(x, labels = labels, rotation = 80)
         plt.ylabel('Proportion')
         plt.title('Hospital utilization of different hospital ownership on ' + str(i))
         plt.legend()
