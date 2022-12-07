@@ -12,6 +12,7 @@ import sys
 import datetime
 import warnings
 import streamlit as st
+import matplotlib.pyplot as plt
 from getdata import connect_to_sql2
 from getdata import get_records_number, get_beds_detail, get_beds_sum_by, \
                     get_covid_change
@@ -95,7 +96,30 @@ bed_all_time = bed_all_time.set_index('collection_date')
 if bed_all_time is False:
     st.text("Server lacks HHS data on " + str(collect_date))
 else:
-    st.dataframe(bed_all_time)
+    xtick = list(bed_all_time.index)
+    xtick = sorted([date.strftime("%y-%m-%d") for date in xtick])
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    plt.plot(xtick, bed_all_time["covid_beds_use"], label="COVID Only")
+    plt.plot(xtick, bed_all_time["covid_beds_use"] +
+             bed_all_time["non_covid_beds_use"], label="Total")
+    ax.set_xticklabels(sorted(xtick), rotation=45, ha="right")
+    ax.set_ylim(bottom=0)
+    plt.title("Cumulative Sum of all Hospital Bed Usage per Week")
+    plt.xlabel("Date (YY-MM-DD)")
+    plt.ylabel("Cumulative Beds in Use")
+    plt.fill_between(
+        x=xtick,
+        y1=bed_all_time["covid_beds_use"],
+        color="#1F77B4",
+        alpha=0.4)
+    plt.fill_between(
+        x=xtick,
+        y1=bed_all_time["covid_beds_use"] + bed_all_time["non_covid_beds_use"],
+        color="#FF7F0E",
+        alpha=0.2)
+    plt.legend()
+    st.write(fig)
 
 st.header("5. Hospital utilization by type of hospital ownership")
 

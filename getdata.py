@@ -262,10 +262,6 @@ def get_hospital(conn, collect_date):
     return df
 
 
-def get_covid_total():
-    pass
-
-
 def get_covid_change(conn, collect_date, nshow, property):
     """Rank the states/hospitals by the number of cases since the last week
 
@@ -344,7 +340,7 @@ def get_covid_change(conn, collect_date, nshow, property):
             change_data = change_data.iloc[(
                 -change_data["change_covid_bed_use"].abs()).argsort()]
             change_data = change_data.iloc[:nshow]
-            return change_data  # .reindex(sorted(change_data.columns), axis=1)
+            return change_data
         else:
             return False
     else:
