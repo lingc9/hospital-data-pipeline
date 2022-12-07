@@ -12,10 +12,11 @@ import sys
 import datetime
 import warnings
 import streamlit as st
+import numpy as np
 import matplotlib.pyplot as plt
 from getdata import connect_to_sql2
 from getdata import get_records_number, get_beds_detail, get_beds_sum_by, \
-                    get_covid_change
+                    get_covid_change, get_distinct_collection_date
 
 # Ignore the warning message from the code
 warnings.filterwarnings("ignore")
@@ -96,6 +97,7 @@ bed_all_time = bed_all_time.set_index('collection_date')
 if bed_all_time is False:
     st.text("Server lacks HHS data on " + str(collect_date))
 else:
+    st.dataframe(bed_all_time)
     xtick = list(bed_all_time.index)
     xtick = sorted([date.strftime("%y-%m-%d") for date in xtick])
     fig = plt.figure()
@@ -127,13 +129,35 @@ st.markdown("Graphs of hospital utilization (the percent of " +
             "available beds being used) by type of hospital " +
             "(private or public), over time.")
 
-bed_by_ownership = get_beds_sum_by(conn, collect_date, "ownership")
-bed_by_ownership = bed_by_ownership.iloc[:, 7:]
+listofdate = get_distinct_collection_date(cur, "hospital_data")
+for i in listofdate:
+    bed_by_ownership = get_beds_sum_by(conn, i, "ownership")
+    bed_by_ownership = bed_by_ownership.iloc[:, 7:] 
 
-if bed_by_ownership is False:
-    st.text("Server lacks HHS and CMS data on " + str(collect_date))
-else:
-    st.dataframe(bed_by_ownership)
+    if bed_by_ownership is False:
+        st.text("Server lacks HHS and CMS data on " + str(collect_date))
+    else:
+        labels = bed_by_ownership["ownership"]
+        adult_util = bed_by_ownership["adult_utilization"]
+        ped_util = bed_by_ownership["pediatric_utilization"]
+        icu_util = bed_by_ownership["icu_utilization"]
+        x = np.arange(len(labels))
+        width = 0.35
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(x - width/2, adult_util, width, label='adult_utilization')
+        rects2 = ax.bar(x + width/2, ped_util, width, label='pediatric_utilization')
+        rects3 = ax.bar(x + width/2, icu_util, width, label='icu_utilization')
+        ax.set_ylabel('Proportion')
+        ax.set_title('Hospital utilization of different hospital ownership')
+        ax.set_xticks(x, labels)
+        ax.legend()
+        ax.bar_label(rects1, padding=3)
+        ax.bar_label(rects2, padding=3)
+        ax.bar_label(rects3, padding=3)
+    
+        st.write(fig)
+
+
 
 st.header("6. Rank states by change in covid case since last week")
 
