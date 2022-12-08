@@ -147,7 +147,7 @@ def get_beds_detail(conn, collect_date, recent):
             raise Exception("Relation does not exist in the server.")
 
         # Subset the 4 most recent weeks if recent restriction is in place
-        if len(lists) > 5 and recent:
+        if len(lists) > 4 and recent:
             index = df.index[df['collection_date'] == collect_date].tolist()
             df = df.iloc[index[0]:index[0]+4]
 
@@ -182,10 +182,10 @@ def get_beds_sum_by(conn, collect_date, property):
     cur = conn.cursor()
     lists_data = get_previous_weeks(cur, "hospital_data", collect_date)
     lists_info = get_distinct_collection_date(cur, "hospital_info")
-    colnames = ["avalible_adult_beds", "avalible_pediatric_beds",
-                "available_icu_beds", "occupied_adult_beds",
-                "occupied_pediatric_beds", "occupied_icu_beds",
-                "covid_beds_use"]
+    colnames = ["avalible_adult_beds",
+                "avalible_pediatric_beds", "available_icu_beds",
+                "occupied_adult_beds", "occupied_pediatric_beds",
+                "occupied_icu_beds", "covid_beds_use"]
     cur.close()
 
     if lists_data and lists_info:

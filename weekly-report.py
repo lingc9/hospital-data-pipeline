@@ -13,6 +13,7 @@ import datetime
 import warnings
 import streamlit as st
 import numpy as np
+import datetime as time
 import matplotlib.pyplot as plt
 from getdata import connect_to_sql2
 from getdata import get_records_number, get_beds_detail, get_beds_sum_by, \
@@ -26,6 +27,7 @@ warnings.filterwarnings("ignore")
 
 collect_date = str(sys.argv[1])
 collect_date = datetime.datetime.strptime(collect_date, "%Y-%m-%d").date()
+last_week = collect_date - time.timedelta(days=7)
 
 # Create connection object
 conn = connect_to_sql2()
@@ -67,24 +69,43 @@ if bed_recent is False:
 else:
     bed_recent = bed_recent.iloc[:, [0, 1, 3, 4, 5, -2]]
     bed_recent = bed_recent.set_index('collection_date')
+    bed_recent.rename(columns={'avalible_adult_beds': 'Avaliable Adult Beds',
+                               'avalible_pediatric_beds':
+                               'Avaliable Pediatric Beds',
+                               'occupied_adult_beds': 'Occupied Adult Beds',
+                               'occupied_pediatric_beds':
+                               'Occupied Pediatric Beds',
+                               'occupied_icu_beds': 'Occupied ICU Beds'},
+                      inplace=True)
     st.dataframe(bed_recent)
 
 st.header("3. Hospital Beds Information by Quality Rating")
 
-st.markdown("A table summarizing the number of beds in use by " +
-            "hospital quality rating, so we can compare high-quality " +
-            "and low-quality hospitals.")
+st.markdown("A table summarizing the number of beds in use by different " +
+            "hospital quality rating, so we can compare groups of " +
+            "high-quality and low-quality hospitals.")
 
 bed_by_quality = get_beds_sum_by(conn, collect_date, "quality_rating")
 
 if bed_by_quality is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
 else:
+    bed_by_quality.rename(columns={'occupied_adult_beds':
+                                   'Occupied Adult Beds',
+                                   'occupied_pediatric_beds':
+                                   'Occupied Pediatric Beds',
+                                   'occupied_icu_beds':
+                                   'Occupied ICU Beds',
+                                   'covid_beds_use': 'COVID Bed Use',
+                                   'quality_rating': 'Quality Rating'},
+                          inplace=True)
     bed_by_quality = bed_by_quality.iloc[:, 3:8]
     bed_by_quality = bed_by_quality.round(0).astype('Int64')
+    cols = [4, 0, 1, 2, 3]
+    bed_by_quality = bed_by_quality[[bed_by_quality.columns[i] for i in cols]]
     st.dataframe(bed_by_quality)
 
-st.header("4. Hospital bed use by all cases and covid of all time")
+st.header("4. Hospital Bed Use by All Cases versus COVID-Only Over Time")
 
 st.markdown("A plot of the total number of hospital beds used " +
             "per week, over all time, split into all cases " +
@@ -119,7 +140,6 @@ else:
         y1=bed_all_time["covid_beds_use"] + bed_all_time["non_covid_beds_use"],
         color="#FF7F0E",
         alpha=0.2)
-    
     fig.tight_layout()
     plt.legend()
     st.write(fig)
@@ -171,25 +191,44 @@ st.markdown("A table of the states in which the number of cases " +
             "has increased by the most since last week.")
 
 state_rank = get_covid_change(conn, collect_date, 10, "state")
-state_rank.rename(columns={'state': 'State',
-                           'change_covid_bed_use': 'Change in COVID Bed Use',
-                           'covid_2022-10-14':
-                           'Total COVID Cases (2022-10-14)',
-                           'covid_2022-10-21':
-                           'Total COVID Cases (2022-10-21)'},
-                           inplace=True)
 
 if state_rank is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
 else:
+    state_rank.rename(columns={'state': 'State',
+                               'change_covid_bed_use':
+                               'Change in COVID Bed Use',
+                               'covid_' + str(last_week):
+                               'Total COVID Cases (' + str(last_week) + ')',
+                               'covid_' + str(collect_date):
+                               'Total COVID Cases (' + str(collect_date) + ')'
+                               }, inplace=True)
+    cols = [3, 0, 1, 2]
+    state_rank = state_rank[[state_rank.columns[i] for i in cols]]
     st.dataframe(state_rank)
 
-st.header("7. Rank hospital by change in covid case since last week")
+st.header("7. Rank Hospital by Change in COVID Cases Since Last Week")
 
 st.markdown("A table of the hospitals (including names and locations) " +
-            "with the largest changes in COVID cases in the last week.")
+            "with the largest absolute changes in COVID cases in the last " +
+            "week.")
 
 hospital_rank = get_covid_change(conn, collect_date, 10, "hospital_id")
+hospital_rank.rename(columns={'hospital_id': 'Hospital ID',
+                              'change_covid_bed_use':
+                              'Absolute Change in COVID Bed Use',
+                              'covid_' + str(last_week):
+                              'Total COVID Cases (' + str(last_week) + ')',
+                              'covid_cases':
+                              'Total COVID Cases (' + str(collect_date) + ')',
+                              'name': 'Name',
+                              'city': 'City',
+                              'state': 'State',
+                              'zip': 'ZIP',
+                              'address': 'Address'},
+                     inplace=True)
+cols = [0, 8, 7, 1, 2, 3, 4, 5]
+hospital_rank = hospital_rank[[hospital_rank.columns[i] for i in cols]]
 
 if hospital_rank is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
