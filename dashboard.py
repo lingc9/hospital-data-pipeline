@@ -134,7 +134,7 @@ listofdate = get_previous_weeks(cur, "hospital_data", collect_date)
 if listofdate is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
 else:
-    list = get_distinct_collection_date(cur, "hospital_data")
+    list = get_previous_weeks(cur, "hospital_data", collect_date)
     for i in list:
         bed_by_ownership = get_beds_sum_by(conn, i, "ownership")
         bed_by_ownership = bed_by_ownership.iloc[:, 7:]
