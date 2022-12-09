@@ -1,7 +1,7 @@
 """
 Driver file to generate weekly reports using interactive dashboard
 
-Run by typing 'streamlit run dashboard.py 2022-10-07' in terminal
+Run by typing 'streamlit run weekly-report.py 2022-10-21' in terminal
 
 Authors: Carol Ling     <caroll2@andrew.cmu.edu>
 #        Xiaochen Sun   <xsun3@andrew.cmu.edu>
@@ -216,25 +216,25 @@ st.markdown("A table of the hospitals (including names and locations) " +
             "week.")
 
 hospital_rank = get_covid_change(conn, collect_date, 10, "hospital_id")
-hospital_rank.rename(columns={'hospital_id': 'Hospital ID',
-                              'change_covid_bed_use':
-                              'Absolute Change in COVID Bed Use',
-                              'covid_' + str(last_week):
-                              'Total COVID Cases (' + str(last_week) + ')',
-                              'covid_cases':
-                              'Total COVID Cases (' + str(collect_date) + ')',
-                              'name': 'Name',
-                              'city': 'City',
-                              'state': 'State',
-                              'zip': 'ZIP',
-                              'address': 'Address'},
-                     inplace=True)
-cols = [0, 8, 7, 1, 2, 3, 4, 5]
-hospital_rank = hospital_rank[[hospital_rank.columns[i] for i in cols]]
 
 if hospital_rank is False:
     st.text("Server lacks HHS and CMS data on " + str(collect_date))
 else:
+    hospital_rank.rename(columns={'hospital_id': 'Hospital ID',
+                                  'change_covid_bed_use':
+                                  'Absolute Change in COVID Bed Use',
+                                  'covid_' + str(last_week):
+                                  'Total COVID Cases ('+str(last_week)+')',
+                                  'covid_cases':
+                                  'Total COVID Cases ('+str(collect_date)+')',
+                                  'name': 'Name',
+                                  'city': 'City',
+                                  'state': 'State',
+                                  'zip': 'ZIP',
+                                  'address': 'Address'},
+                         inplace=True)
+    cols = [0, 8, 7, 1, 2, 3, 4, 5]
+    hospital_rank = hospital_rank[[hospital_rank.columns[i] for i in cols]]
     st.dataframe(hospital_rank)
 
 st.text("Made by Team Pipers, 2022")
