@@ -2,6 +2,7 @@
 Driver file to generate weekly reports using interactive dashboard
 
 Run by typing 'streamlit run weekly-report.py 2022-10-21' in terminal
+Where '2022-10-21' can be any yyyy-mm-dd, indicating collection date
 
 Authors: Carol Ling     <caroll2@andrew.cmu.edu>
 #        Xiaochen Sun   <xsun3@andrew.cmu.edu>
